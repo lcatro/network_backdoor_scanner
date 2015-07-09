@@ -158,3 +158,36 @@ password_list resolve_dictionary_get_password_list(const dictionary& in_dictiona
 
     return result;
 }
+
+void resolve_dictionary_add_username(dictionary& in_dictionary,const string username) {
+    if (!in_dictionary.empty()) {
+        in_dictionary[username]=in_dictionary.begin()->second;
+    } else {
+        password_list empty_list;
+        in_dictionary[username]=empty_list;
+    }
+}
+
+void resolve_dictionary_add_password(dictionary& in_dictionary,const string password) {
+    if (!in_dictionary.empty()) {
+        for (dictionary::iterator iterator=in_dictionary.begin();
+                                  iterator!=in_dictionary.end();
+                                  ++iterator) {
+            iterator->second.push_back(password);
+        }
+    }
+}
+
+void resolve_dictionary_add_password(dictionary& in_dictionary,const password_list password) {
+    if (!in_dictionary.empty()) {
+        for (dictionary::iterator username_iterator=in_dictionary.begin();
+                                  username_iterator!=in_dictionary.end();
+                                  ++username_iterator) {
+            for (password_list::const_iterator password_iterator=password.begin();
+                                               password_iterator!=password.end();
+                                               ++password_iterator) {
+                username_iterator->second.push_back(*password_iterator);
+            }
+        }
+    }
+}

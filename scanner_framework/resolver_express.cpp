@@ -5,6 +5,7 @@
 
 #include <windows.h>
 
+#include "encoder_base64.h"
 #include "resolver_express.h"
 #include "resolver_string.h"
 
@@ -133,10 +134,8 @@ string resolve_express_function(const string express) {
             function_arg=separate_string(function_arg,"[","]");
             string down,up;
             split=split_string(function_arg,"-");
-
             if (1<count_string(function_arg,"-")) {
                 left_move_string(split.second,1);
-
                 if (resolve_express_is_function(split.second)) {
                     down=split.first;
                     up=split.second;
@@ -167,14 +166,56 @@ string resolve_express_function(const string express) {
             long down_=string_to_number(down),up_=string_to_number(up);
             long rnd=ramdon(down_,up_);
             result+=number_to_string(rnd);
-
         } else if (function_time==function_name) {
         } else if (function_base64==function_name) {
+            if (!resolve_express_is_function(function_arg)) {
+                return base64_encode(function_arg.c_str(),function_arg.length());
+            } else {
+                string encode_string(resolve_express_function(function_arg));
+                return base64_encode(encode_string.c_str(),encode_string.length());
+            }
         }
         split=split_string(next_function,",");
         function=split.first;
         next_function=split.second;
         left_move_string(next_function,1);
+    }
+    return result;
+}
+
+string resolve_express(const string express) {
+    string resolve_string(express);
+    string result;
+
+    while (1) {
+        split_result split;
+        string function;
+        if (-1!=find_string(resolve_string,"rnd(")) {
+            split=split_string(resolve_string,"rnd(");
+            result+=split.first;
+            function=split.second;
+            split=split_string(function,")");
+            function=split.first;
+            function+=")";
+            left_move_string(split.second,1);
+            resolve_string=split.second;
+            result+=resolve_express_function(function);
+        } else if (-1!=find_string(resolve_string,"base64(")) {
+            split=split_string(resolve_string,"base64(");
+            result+=split.first;
+            function=split.second;
+            split=split_string(function,")");
+            function=split.first;
+            function+=")";
+            left_move_string(split.second,1);
+            resolve_string=split.second;
+            result+=resolve_express_function(function);
+        } else if (-1!=find_string(resolve_string,"time()")) {
+            function="time()";
+        } else {
+            result+=resolve_string;
+            break;
+        }
     }
     return result;
 }

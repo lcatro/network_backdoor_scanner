@@ -31,6 +31,7 @@ string resolve_express_http(const string express);
 */
 
 string resolve_express_function(const string express);
+string resolve_express(const string express);
 
 
 #endif

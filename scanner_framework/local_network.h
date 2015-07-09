@@ -17,6 +17,7 @@ extern char network_session[IPV4_IP_LENGTH];
 extern char network_session_last[IPV4_IP_LENGTH];
 extern unsigned long network_session_size;
 
+bool check_ip(const char* ip);
 void local_network_init(void);
 void local_network_clean(void);
 

@@ -86,6 +86,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\encoder_base64.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\local_network.cpp
 # End Source File
 # Begin Source File
@@ -142,11 +146,19 @@ SOURCE=.\scan_tcp.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\encoder_base64.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\local_network.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\network_crack.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\network_dictionary.h
 # End Source File
 # Begin Source File
 

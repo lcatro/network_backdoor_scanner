@@ -108,6 +108,12 @@ static void get_local_network_information(void) {
 	}
 }
 
+bool check_ip(const char* ip) {
+    if (-1==inet_addr(ip))
+        return false;
+    return true;
+}
+
 void local_network_init(void) {
     WSADATA init;
     WSAStartup(2,&init);

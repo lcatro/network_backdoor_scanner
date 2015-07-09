@@ -43,5 +43,8 @@ unsigned int resolve_dictionary_get_user_count(const dictionary& in_dictionary);
 username_list resolve_dictionary_get_user_list(const dictionary& in_dictionary);
 unsigned int resolve_dictionary_get_password_count(const dictionary& in_dictionary);
 password_list resolve_dictionary_get_password_list(const dictionary& in_dictionary,const string username);
+void resolve_dictionary_add_username(dictionary& in_dictionary,const string username);
+void resolve_dictionary_add_password(dictionary& in_dictionary,const string password);
+void resolve_dictionary_add_password(dictionary& in_dictionary,const password_list password);
 
 #endif

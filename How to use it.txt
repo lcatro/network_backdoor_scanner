@@ -14,7 +14,7 @@ using:scan %ip% [-P:[port1,port2,port3,...]] [-F:[fake_ip1,fake_ip2,...]]
 洪水攻击主机
 using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]
 在线破解
-using:crack %ip% %port% [-D %dictionary_path%] [-E %express%]
+using:crack %ip% %port% %express% %success_term% [%user_dictionary_path% %password_dictionary_path%]
 路由跟踪
 using:tracert %ip%
 抓取页面
