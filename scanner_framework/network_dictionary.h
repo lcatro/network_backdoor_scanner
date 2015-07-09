@@ -6,16 +6,16 @@ const char* username[]={
     "admin",
     "root",
     "administrator",
-//    "guest"
+    "guest"
 };
 
 const char* password[]={
-//    "",
+    "",
     "0123456789",
     "admin",
     "root",
     "toor",
-    "access"/*,
+    "access",
     "debug",
     "Manager",
     "User",
@@ -29,7 +29,7 @@ const char* password[]={
     "fuckyou",
     "wocaoni",
     "Password",
-    "password"*/
+    "password"
 };
 
 #endif

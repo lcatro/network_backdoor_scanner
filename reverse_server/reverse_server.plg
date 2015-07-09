@@ -6,6 +6,25 @@
 --------------------Configuration: reverse_server - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP58CF.tmp" with contents
+[
+/nologo /ML /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/reverse_server.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Users\Administrator\Desktop\code_file\scaner\reverse_server\main.cpp"
+]
+Creating command line "cl.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP58CF.tmp" 
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP58D0.tmp" with contents
+[
+kernel32.lib user32.lib /nologo /subsystem:console /incremental:no /pdb:"Release/reverse_server.pdb" /machine:I386 /out:"Release/reverse_server.exe" 
+.\Release\main.obj
+.\Release\network_encoder.obj
+.\Release\network_tunnal.obj
+.\Release\scan_tcp.obj
+]
+Creating command line "link.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP58D0.tmp"
+<h3>Output Window</h3>
+Compiling...
+main.cpp
+Linking...
 
 
 

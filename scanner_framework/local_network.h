@@ -20,5 +20,6 @@ extern unsigned long network_session_size;
 bool check_ip(const char* ip);
 void local_network_init(void);
 void local_network_clean(void);
+void sleep(unsigned int time);
 
 #endif

@@ -131,3 +131,6 @@ void local_network_clean(void) {
     WSACleanup();
 }
 
+void sleep(unsigned int time) {
+    Sleep(time);
+}

