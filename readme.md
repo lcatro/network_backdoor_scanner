@@ -3,11 +3,7 @@ scanner_framework
 
 ===
 
-网络探测框架,适用于入侵到内网探测其它网络设备,探测器具有体积小,功能多,而且带有反向连接从内网穿透出外网连接控制终端,通信数据采用动态加密,再也不怕警察叔叔知道我在干坏事儿啦,为了方便破解一些弱口令设备,内部带有在线破解功能(暂时支持HTTP 破解).如果觉得这些功能满足不了需求,可以使用端口映射把你需要的工具直接通过隧道对接到内网的某台指定的主机端口上进行扫描..
-
-***
-
-###LCatro
+网络探测框架,适用于入侵到内网探测其它网络设备,探测器具有体积小,功能多,而且带有反向连接从内网穿透出外网连接控制终端,通信数据采用动态加密,再也不怕警察叔叔知道我在干坏事儿啦,为了方便破解一些弱口令设备,内部带有在线破解功能(暂时支持HTTP 破解).如果觉得这些功能满足不了需求,可以使用端口映射把你需要的工具直接通过隧道对接到内网的某台指定的主机端口上进行扫描..    --  LCatro
 
 ***
 
@@ -67,7 +63,7 @@ using:quit<br/>
 	<br/>
 	user=%username%&pass=%password%<br/>
 	
-	其中Content-length: %length% 的意思是让程序自动在此填充上下文的大小[因为这个长度是会变化的],%username% 和%password% 就是自动填充用户名和密码[这里也可以不需要全部都用,比如破解水星路由器,直接填%password% 即可启动];最后输入<end>来确认数据包填写完成,如果中间某个位置出现填写错误就输入<reset>来重新填写破解数据包,下面的输入成功判断条件也是同理..
+	其中Content-length: %length% 的意思是让程序自动在此填充上下文的大小<br/>[因为这个长度是会变化的],%username% 和%password% 就是自动填充用户名和密码<br/>[这里也可以不需要全部都用,比如破解水星路由器,直接填%password% 即可启动]<br/>最后输入<end>来确认数据包填写完成,如果中间某个位置出现填写错误就输入<reset>来重新填写破解数据包,下面的输入成功判断条件也是同理..
 	
 	input your check term:
 	
@@ -82,10 +78,11 @@ using:quit<br/>
 	破解完成
 
 ###端口转发 route
-	using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]<br/>
+	端口转发原理:
+	![route_design](https://raw.githubusercontent.com/lcatro/network_backdoor/master/scanner_framework/route_design.png)
 	
 
 ##Other
 ===
-####reverse_server 是用来做反向连接用的服务端
-####scanner.exe -bind 参数启动程序需要自己主动连过去,但是客户端还没写,也没什么需求,以后慢慢来..
+#####reverse_server 是用来做反向连接用的服务端
+#####scanner.exe -bind 参数启动程序需要自己主动连过去,但是客户端还没写,也没什么需求,以后慢慢来..
