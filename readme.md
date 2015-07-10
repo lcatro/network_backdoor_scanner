@@ -77,10 +77,10 @@ using:quit<br/>
 	
 	破解完成
 
-###端口转发 route
-	端口转发原理:
-	![](https://raw.githubusercontent.com/lcatro/network_backdoor/master/scanner_framework/route_design.png)
-	
+
+####端口转发原理:
+####![image](https://raw.githubusercontent.com/lcatro/network_backdoor/master/scanner_framework/route_design.png)
+
 
 ###Other
 ===
