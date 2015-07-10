@@ -1,5 +1,5 @@
 
-scanner_framework
+##scanner_framework
 
 ===
 
@@ -79,10 +79,10 @@ using:quit<br/>
 
 ###端口转发 route
 	端口转发原理:
-	![route_design](https://raw.githubusercontent.com/lcatro/network_backdoor/master/scanner_framework/route_design.png)
+	![](https://raw.githubusercontent.com/lcatro/network_backdoor/master/scanner_framework/route_design.png)
 	
 
-##Other
+###Other
 ===
 #####reverse_server 是用来做反向连接用的服务端
 #####scanner.exe -bind 参数启动程序需要自己主动连过去,但是客户端还没写,也没什么需求,以后慢慢来..
