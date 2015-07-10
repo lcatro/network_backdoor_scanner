@@ -12,33 +12,33 @@ scanner_framework
 ***
 
 ###启动方式
-scanner.exe 控制台启动
-scanner.exe -bind [%port%] 绑定端口,远程访问
-scanner.exe -recon %ip% [%port%] 反向连接,远程访问,默认是80 [WARNING! 记得先启动reverse_server ,不然scanner.exe 不能成功连接]
+scanner.exe 控制台启动<br/>
+scanner.exe -bind [%port%] 绑定端口,远程访问<br/>
+scanner.exe -recon %ip% [%port%] 反向连接,远程访问,默认是80 [WARNING! 记得先启动reverse_server ,不然scanner.exe 不能成功连接]<br/>
 
 ###使用方法
-扫描当前网段存活的主机,并且自动搜集数据
-using:arp
-获取当前主机的网络信息
-using:local
-测试主机是否连通
-using:ping %ip%
-TCP SYN 扫描主机
-using:scan %ip% [-P:[port1,port2,port3,...]] [-F:[fake_ip1,fake_ip2,...]]
-洪水攻击主机
-using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]
-在线破解
-using:crack %ip% %port% [%user_dictionary_path% %password_dictionary_path%]
-路由跟踪
-using:tracert %ip%
-抓取页面
-using:getpage %ip% [-PORT:%port%] [-PATH:%path%]
-启动端口转发功能
-using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]
-显示帮助
-using:help
-退出
-using:quit
+扫描当前网段存活的主机,并且自动搜集数据<br/>
+using:arp<br/>
+获取当前主机的网络信息<br/>
+using:local<br/>
+测试主机是否连通<br/>
+using:ping %ip%<br/>
+TCP SYN 扫描主机<br/>
+using:scan %ip% [-P:[port1,port2,port3,...]] [-F:[fake_ip1,fake_ip2,...]]<br/>
+洪水攻击主机<br/>
+using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]<br/>
+在线破解<br/>
+using:crack %ip% %port% [%user_dictionary_path% %password_dictionary_path%]<br/>
+路由跟踪<br/>
+using:tracert %ip%<br/>
+抓取页面<br/>
+using:getpage %ip% [-PORT:%port%] [-PATH:%path%]<br/>
+启动端口转发功能<br/>
+using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]<br/>
+显示帮助<br/>
+using:help<br/>
+退出<br/>
+using:quit<br/>
 
 ###在线破解 crack
 	在线破解功能原理是通过自己构造特定的HTTP 数据包然后程序根据字典穷举测试出帐号密码
