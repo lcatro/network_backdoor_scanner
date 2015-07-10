@@ -46,6 +46,8 @@ long string_to_number(const char* input_string) {
 }
 
 const string quit("quit");
+const string crack("crack");
+const string end("<end>");
 bool connect_stat=false;
 
 static void recv_thread(unsigned int sock_accept) {
@@ -114,7 +116,21 @@ void main(void) {
 
                         network_tunnal_open(local_port);
                     }
-                    if (resolve==quit) {
+                    if (crack==resolve) {
+                        unsigned int end_count=0;
+                        while (1) {
+                            char line[PACKET_SEND_BUFFER]={0};
+                            gets(line);
+                            string line_express(line);
+                            unsigned int line_length=strlen(line);
+                            line_length=network_encode(line,line_length);
+                            send(sock_accept,line,line_length,0);
+                            if (end==line_express)
+                                ++end_count;
+                            if (end_count>=2)
+                                break;
+                        }
+                    } else if (quit==resolve) {
                         printf("Exit Server!\n");
                         break;
                     }

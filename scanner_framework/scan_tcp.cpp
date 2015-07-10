@@ -140,8 +140,11 @@ unsigned int scan_tcp_accept(unsigned int tcp_handle) {
 }
 
 bool scan_tcp_set_recv_block(unsigned int tcp_handle,unsigned int block_time) {
-    int time_out=block_time;
-    return (SOCKET_ERROR!=setsockopt(tcp_handle,SOL_SOCKET,SO_RCVTIMEO,(const char*)&time_out,sizeof(time_out)))?true:false;
+    return (SOCKET_ERROR!=setsockopt(tcp_handle,SOL_SOCKET,SO_RCVTIMEO,(const char*)&block_time,sizeof(block_time)))?true:false;
+}
+
+bool scan_tcp_set_recv_buffer_length(unsigned int tcp_handle,unsigned int buffer_length) {
+    return (SOCKET_ERROR!=setsockopt(tcp_handle,SOL_SOCKET,SO_RCVBUF,(const char*)&buffer_length,sizeof(buffer_length)))?true:false;
 }
 
 void scan_tcp_send(unsigned int tcp_handle,const char* buffer,unsigned int buffer_length) {

@@ -21,5 +21,6 @@ bool check_ip(const char* ip);
 void local_network_init(void);
 void local_network_clean(void);
 void sleep(unsigned int time);
+bool get_host(const char* input_host,char* output_ip);
 
 #endif

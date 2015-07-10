@@ -108,11 +108,22 @@ string separate_string(const string in_string,const string left_string,const str
     return split_string(split.second,find_last_string(split.second,right_string)).first;
 }
 
-
 string separate_string(const string in_string,const unsigned int split_offset,const unsigned int separete_length) {
     split_result split(split_string(in_string,split_offset));
 
     return split_string(split.second,separete_length).first;
+}
+
+void replace_string(string& in_string,const string source_string,const string dest_string) {
+    unsigned int offset=find_string(in_string,source_string);
+    unsigned int length=source_string.length();
+    if (-1!=offset && length) {
+        split_result split(split_string(in_string,source_string));
+        in_string=split.first;
+        in_string+=dest_string;
+        left_move_string(split.second,length);
+        in_string+=split.second;
+    }
 }
 
 string upper_string(const string in_string) {

@@ -94,6 +94,7 @@ static long ramdon(long down,long up) {
 
 static const string function_rnd("rnd");
 static const string function_time("time");
+static const string function_len("len");
 static const string function_base64("base64");
 
 static bool resolve_express_is_function_name(const string function_name) {
@@ -174,6 +175,9 @@ string resolve_express_function(const string express) {
                 string encode_string(resolve_express_function(function_arg));
                 return base64_encode(encode_string.c_str(),encode_string.length());
             }
+        } else if (function_len==function_name) {
+            unsigned int length=function_arg.length();
+            return number_to_string(length);
         }
         split=split_string(next_function,",");
         function=split.first;
@@ -183,39 +187,36 @@ string resolve_express_function(const string express) {
     return result;
 }
 
-string resolve_express(const string express) {
-    string resolve_string(express);
+static string resolve_express_resolve_function(const string express,const string function_name) {
     string result;
+    split_result split;
+    string function;
+    split=split_string(express,function_name);
+    result+=split.first;
+    function=split.second;
+    split=split_string(function,")");
+    function=split.first;
+    function+=")";
+    left_move_string(split.second,1);
+    result+=resolve_express_function(function);
+    result+=split.second;
+    return result;
+}
+
+string resolve_express(const string express) {
+    string result(express);
 
     while (1) {
-        split_result split;
-        string function;
-        if (-1!=find_string(resolve_string,"rnd(")) {
-            split=split_string(resolve_string,"rnd(");
-            result+=split.first;
-            function=split.second;
-            split=split_string(function,")");
-            function=split.first;
-            function+=")";
-            left_move_string(split.second,1);
-            resolve_string=split.second;
-            result+=resolve_express_function(function);
-        } else if (-1!=find_string(resolve_string,"base64(")) {
-            split=split_string(resolve_string,"base64(");
-            result+=split.first;
-            function=split.second;
-            split=split_string(function,")");
-            function=split.first;
-            function+=")";
-            left_move_string(split.second,1);
-            resolve_string=split.second;
-            result+=resolve_express_function(function);
-        } else if (-1!=find_string(resolve_string,"time()")) {
-            function="time()";
-        } else {
-            result+=resolve_string;
+        if (-1!=find_string(result,"rnd(")) {
+            result=resolve_express_resolve_function(result,"rnd(");
+        } else if (-1!=find_string(result,"base64(")) {
+            result=resolve_express_resolve_function(result,"base64(");
+        } else if (-1!=find_string(result,"time()")) {
+            //function="time()";
+        } else if (-1!=find_string(result,"len(")) {
+            result=resolve_express_resolve_function(result,"len(");
+        } else
             break;
-        }
     }
     return result;
 }

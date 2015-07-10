@@ -83,12 +83,7 @@ crack_index network_crack_http(const string target_ip,const unsigned int target_
     crack_index result;
 
     unsigned int username_point=find_string(resolve_string,"%username%");
-    if (-1!=username_point) {
-        split=split_string(resolve_string,"%username%");
-        resolve_string=split.first;
-        left_move_string(split.second,10);
-        resolve_string+=split.second;
-    } else {
+    if (-1==username_point) {
         dictionary crack_dictionary_;
         resolve_dictionary_add_username(crack_dictionary_,"");
         resolve_dictionary_add_password(crack_dictionary_,
@@ -97,12 +92,7 @@ crack_index network_crack_http(const string target_ip,const unsigned int target_
         crack_dictionary=crack_dictionary_;
     }
     unsigned int password_point=find_string(resolve_string,"%password%");
-    if (-1!=password_point) {
-        split=split_string(resolve_string,"%password%");
-        resolve_string=split.first;
-        left_move_string(split.second,10);
-        resolve_string+=split.second;
-    } else {
+    if (-1==password_point) {
         dictionary crack_dictionary_;
         username_list name_list;
         name_list=resolve_dictionary_get_user_list(crack_dictionary);
@@ -113,6 +103,7 @@ crack_index network_crack_http(const string target_ip,const unsigned int target_
             resolve_dictionary_add_username(crack_dictionary,username_iterator->first);
         resolve_dictionary_add_password(crack_dictionary,"");
     }
+    unsigned int length_point=find_string(resolve_string,"%length%");
 
     unsigned int handle=scan_tcp_connect(target_ip.c_str(),target_port);
     if (-1!=handle) {
@@ -124,15 +115,23 @@ crack_index network_crack_http(const string target_ip,const unsigned int target_
                                                ++password_iterator) {
                 string packet(resolve_string);
                 if (-1!=username_point)
-                    packet.insert(username_point,username_iterator->first);
+                    replace_string(packet,"%username%",username_iterator->first);
                 if (-1!=password_point)
-                    packet.insert(password_point+username_iterator->first.length(),*password_iterator);
+                    replace_string(packet,"%password%",*password_iterator);
                 packet=resolve_express(packet);
+                if (-1!=length_point) {
+                    string http_body;
+                    split_result result_body(split_string(packet,"\r\n\r\n"));
+                    if (!result_body.second.empty()) {
+                        unsigned int length=result_body.second.length()-4;
+                        replace_string(packet,"%length%",number_to_string(length));
+                    }
+                }
 CRACK:
-                char recv_buffer[NETWORK_CRACK_RECV_BUFFER_LENGTH]={0};
                 scan_tcp_send(handle,packet.c_str(),packet.length());
+                char recv_buffer[NETWORK_CRACK_RECV_BUFFER_LENGTH]={0};
                 unsigned int recv_length=scan_tcp_recv(handle,recv_buffer,NETWORK_CRACK_RECV_BUFFER_LENGTH);
-                if (-1!=recv_length) {
+                if (-1!=recv_length && recv_length) {
                     if (-1!=find_string(recv_buffer,crack_term)) {
                         result.first=username_iterator->first;
                         result.second=*password_iterator;

@@ -44,6 +44,7 @@ void         left_remove       (string& in_string,const string remove_string);
 void         right_remove      (string& in_string,const string remove_string);
 string       separate_string   (const string in_string,const string left_string,const string right_string);
 string       separate_string   (const string in_string,const unsigned int split_offset,const unsigned int separete_length);
+void         replace_string    (string& in_string,const string source_string,const string dest_string);
 
 string       upper_string(const string in_string);
 

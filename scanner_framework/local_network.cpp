@@ -134,3 +134,13 @@ void local_network_clean(void) {
 void sleep(unsigned int time) {
     Sleep(time);
 }
+
+bool get_host(const char* input_host,char* output_ip) {
+    hostent* host=gethostbyname(input_host);
+    if (NULL!=host) {
+        char* copy_ip=inet_ntoa(*(in_addr*)host->h_addr_list[0]);
+        memcpy(output_ip,copy_ip,IPV4_IP_LENGTH);
+        return true;
+    }
+    return false;
+}
