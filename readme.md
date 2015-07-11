@@ -38,7 +38,9 @@ using:quit<br/>
 
 ###在线破解 crack
 	在线破解功能原理是通过自己构造特定的HTTP 数据包然后程序根据字典穷举测试出帐号密码
-	###什么是表达式?
+	
+	什么是表达式?
+	
 	表达式的意思是给程序一个填充数据的框架,在接下来的穷举测试中会根据表达式内的关键字来填充数据,下面是在线破解的例子:
 	
 	本地网络192.168.1.103:80 启用了PHP 服务器,在探测器里面输入破解命令
@@ -76,6 +78,25 @@ using:quit<br/>
 	username:root password:toor
 	
 	破解完成
+	
+	
+	表达式函数:
+	
+	base64(%string%) -- 采用base64 编码
+	time() -- 获取系统时间
+	len(%string%) -- 统计字符串长度
+	rnd([%low%-%up%]) -- 在%low% 到%up% 之间生成随机数
+	
+	Example :
+	
+	破解水星的数据包 (其它都差不多,关键在Cookie):
+	
+	Cookie: a2404_pages=10; a2404_times=5; Authorization=Basic%20base64(admin:%password%)\r\n
+	
+	接下来会把%password% 先填充好之后再编码base64
+	
+	WARNING! 由于水平问题还做不出递归,请见谅 ..  
+	
 
 
 ####端口转发原理:
