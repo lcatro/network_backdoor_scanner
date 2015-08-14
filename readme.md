@@ -1,14 +1,13 @@
 ﻿
-##scanner_framework
+## scanner_framework ##
 
-===
 
 中文:
 网络探测框架,适用于入侵到内网探测其它网络设备,探测器具有体积小,功能多,而且带有反向连接从内网穿透出外网连接控制终端,通信数据采用动态加密,再也不怕警察叔叔知道我在干坏事儿啦,为了方便破解一些弱口令设备,内部带有在线破解功能(暂时支持HTTP 破解).如果觉得这些功能满足不了需求,可以使用端口映射把你需要的工具直接通过隧道对接到内网的某台指定的主机端口上进行扫描
 
 English:
 This is an internal network scanner like meterpreter .I will create more function into it scanner (now include many basic network scanner and network crack [like BurpSuite,crack HTTP]).Reverse connect function is to facilitate the attacker management hacked machine and crypte communication.Tunnel connect help your attack process's network flow  crossing the firewall of internal network.
-===
+
 
 网络探测框架,适用于入侵到内网探测其它网络设备,探测器具有体积小,功能多,而且带有反向连接从内网穿透出外网连接控制终端,通信数据采用动态加密,再也不怕警察叔叔知道我在干坏事儿啦,为了方便破解一些弱口令设备,内部带有在线破解功能(暂时支持HTTP 破解).如果觉得这些功能满足不了需求,可以使用端口映射把你需要的工具直接通过隧道对接到内网的某台指定的主机端口上进行扫描..    --  LCatro
 
