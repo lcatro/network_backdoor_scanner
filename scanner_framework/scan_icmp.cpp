@@ -4,6 +4,7 @@
 #include <memory.h>
 
 #include <windows.h>
+#include <winsock.h>
 
 #include "scan_icmp.h"
 

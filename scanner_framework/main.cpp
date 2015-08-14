@@ -651,9 +651,8 @@ static void default_tcp_scan_(string target_ip,unsigned int target_port) {
 static void default_tcp_scan_fake_ip_(string target_ip,unsigned int target_port,split_block_result fake_ip) {
     for (split_block_result::const_iterator iterator=fake_ip.begin();
                                             iterator!=fake_ip.end();
-                                            ++iterator) {
+                                            ++iterator)
         scan_tcp_fake_ip(target_ip.c_str(),target_port,iterator->c_str(),SCAN_TCP_PORT);
-    }
     default_tcp_scan_(target_ip,target_port);
 }
 

@@ -110,6 +110,10 @@ SOURCE=.\network_route.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\network_server_dns.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\resolver_dictionary.cpp
 # End Source File
 # Begin Source File
@@ -167,6 +171,10 @@ SOURCE=.\network_encoder.h
 # Begin Source File
 
 SOURCE=.\network_route.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\network_server_dns.h
 # End Source File
 # Begin Source File
 
