@@ -10,6 +10,7 @@
 #include "network_dictionary.h"
 #include "network_encoder.h"
 #include "network_route.h"
+#include "network_server_dns.h"
 #include "resolver_express.h"
 #include "resolver_dictionary.h"
 #include "resolver_html.h"
@@ -80,6 +81,9 @@ static const string command_arplist("arp"),
                     command_route("route"),
                     //  启动端口转发功能
                     //  using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]
+                    command_dns("dns"),
+                    //  DNS 服务器
+                    //  using:dns [run|exit] | add %host% %ip% | delete %host%
                     command_help("help"),
                     //  显示帮助
                     command_quit("quit");
@@ -241,6 +245,7 @@ static execute_state execute_command(const string command) {
                 }
                 return ERROR;
             } else if (command_flood==split[0]) {
+                //  WARNING!  no flood code ..
             } else if (command_crack==split[0]) {
                 if (3<=result_length && result_length<=5) {
                     string ip(split[1]);
@@ -454,7 +459,51 @@ static execute_state execute_command(const string command) {
                         return OK;
                     }
                 }
-
+                return ERROR;
+            } else if (command_dns==split[0]) {
+                /*
+                output_inforation+="DNS 服务器\r\n";
+                output_inforation+="using:dns [run|exit] | add %host% %ip% | delete %host%\r\n";
+                */
+                if (2==result_length) {
+                    string flag_run("run"),flag_exit("exit");
+                    if (flag_run==split[1]) {
+                        if (network_server_dns_start()) {
+                            output_inforation="dns server running!\r\n";
+                            output_data(output_inforation);
+                            return OK;
+                        }
+                        output_inforation="dns server start error!\r\n";
+                        output_data(output_inforation);
+                    } else if (flag_exit==split[1]) {
+                        network_server_dns_close();
+                        output_inforation="dns server exit!\r\n";
+                        output_data(output_inforation);
+                        return OK;
+                    }
+                } else if (3==result_length) {
+                    string flag_delete("delete");
+                    if (flag_delete==split[1]) {
+                        network_server_dns_delete(split[2].c_str());
+                        output_inforation="dns server delete success - host:";
+                        output_inforation+=split[2];
+                        output_inforation+="\r\n";
+                        output_data(output_inforation);
+                        return OK;
+                    }
+                } else if (4==result_length) {
+                    string flag_add("add");
+                    if (flag_add==split[1]) {
+                        network_server_dns_add(split[2].c_str(),split[3].c_str());
+                        output_inforation="dns server add success - host:";
+                        output_inforation+=split[2];
+                        output_inforation+=" ip:";
+                        output_inforation+=split[3];
+                        output_inforation+="\r\n";
+                        output_data(output_inforation);
+                        return OK;
+                    }
+                }
                 return ERROR;
             } else if (command_help==split[0]) {
                 output_inforation="help:\r\n";
@@ -475,6 +524,8 @@ static execute_state execute_command(const string command) {
                 output_inforation+="using:getpage %ip% [-PORT:%port%] [-PATH:%path%]\r\n";
                 output_inforation+="启动端口转发功能\r\n";
                 output_inforation+="using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]\r\n";
+                output_inforation+="DNS 服务器\r\n";
+                output_inforation+="using:dns [run|exit] | add %host% %ip% | delete %host%\r\n";
                 output_inforation+="退出\r\n";
                 output_inforation+="using:quit\r\n";
                 output_data(output_inforation);

