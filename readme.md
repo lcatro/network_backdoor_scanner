@@ -69,7 +69,7 @@ using:quit<br/>
 	Content-length: %length%<br/>
 	Pragma: no-cache<br/>
 	<br/>
-	**user=%username%&pass=%password%**<br/>
+	\*\*user=%username%&pass=%password%\*\*<br/>
 	
 	其中Content-length: %length% 的意思是让程序自动在此填充上下文的大小<br/>[因为这个长度是会变化的],%username% 和%password% 就是自动填充用户名和密码<br/>[这里也可以不需要全部都用,比如破解水星路由器,直接填%password% 即可启动]<br/>最后输入<end>来确认数据包填写完成,如果中间某个位置出现填写错误就输入<reset>来重新填写破解数据包,下面的输入成功判断条件也是同理..
 	
@@ -80,18 +80,18 @@ using:quit<br/>
 	
 	now cracking!
 	
-	**network crack - target:192.168.1.103:80
-	username:root password:toor**
+	\*\*network crack - target:192.168.1.103:80
+	username:root password:toor\*\*
 	
 	破解完成
 	
 	
 	表达式函数:
 	
-	**base64(%string%)** -- 采用base64 编码
-	**time()** -- 获取系统时间
-	**len(%string%)** -- 统计字符串长度
-	**rnd([%low%-%up%])** -- 在%low% 到%up% 之间生成随机数
+	\*\*base64(%string%)\*\* -- 采用base64 编码
+	\*\*time()\*\* -- 获取系统时间
+	\*\*len(%string%)\*\* -- 统计字符串长度
+	\*\*rnd([%low%-%up%])\*\* -- 在%low% 到%up% 之间生成随机数
 	
 	Example :
 	
@@ -108,12 +108,12 @@ using:quit<br/>
 
 ####DNS 服务器 [About DNS Server]
 
-DNS 服务器是针对内网的信息钓鱼,比如通过伪造的站点来钓得更多的个人信息或者欺骗应用程序更新,如果上面的用法还不太明白的话可以看这里 [DNS server usualy use redirecting to phishing sites]
+DNS 服务器是针对内网的信息钓鱼,比如通过伪造的站点来钓得更多的个人信息或者欺骗应用程序更新,如果上面的用法还不太明白的话可以看这里 [DNS server usualy use redirecting to phishing sites]<br/>
 
-dns run 启动DNS 服务器 [run dns server]
-dns exit 退出DNS 服务器 [exit dns server]
-dns add m.login.taobao.com 127.0.0.1 把淘宝的手机登陆域名绑定到本地IP [point m.login.taobao.com to localhost via dns setting]
-dns delete www.baidu.com 删除DNS 查询项目 [delete this record]
+dns run 启动DNS 服务器 [run dns server]<br/>
+dns exit 退出DNS 服务器 [exit dns server]<br/>
+dns add m.login.taobao.com 127.0.0.1 把淘宝的手机登陆域名绑定到本地IP [point m.login.taobao.com to localhost via dns setting]<br/>
+dns delete www.baidu.com 删除DNS 查询项目 [delete this record]<br/>
 
 
 ####端口转发原理 [tunnal port design]
