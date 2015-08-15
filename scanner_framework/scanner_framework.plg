@@ -6,11 +6,12 @@
 --------------------Configuration: scanner_framework - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP2686.tmp" with contents
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP50FE.tmp" with contents
 [
 /nologo /ML /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/scanner_framework.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
 "C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\encoder_base64.cpp"
 "C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\local_network.cpp"
+"C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\main.cpp"
 "C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\network_crack.cpp"
 "C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\network_encoder.cpp"
 "C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\network_route.cpp"
@@ -24,8 +25,8 @@ Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP2686.tmp" with 
 "C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\scan_icmp.cpp"
 "C:\Users\Administrator\Desktop\code_file\scaner\scanner_framework\scan_tcp.cpp"
 ]
-Creating command line "cl.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP2686.tmp" 
-Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP2687.tmp" with contents
+Creating command line "cl.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP50FE.tmp" 
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP50FF.tmp" with contents
 [
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:no /pdb:"Release/scanner_framework.pdb" /machine:I386 /out:"Release/scanner_framework.exe" 
 .\Release\encoder_base64.obj
@@ -44,11 +45,12 @@ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32
 .\Release\scan_icmp.obj
 .\Release\scan_tcp.obj
 ]
-Creating command line "link.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP2687.tmp"
+Creating command line "link.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP50FF.tmp"
 <h3>Output Window</h3>
 Compiling...
 encoder_base64.cpp
 local_network.cpp
+main.cpp
 network_crack.cpp
 network_encoder.cpp
 network_route.cpp
