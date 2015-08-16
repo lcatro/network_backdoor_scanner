@@ -1,12 +1,14 @@
 
-
 #ifndef _LOCAL_NETWORK_H__
 #define _LOCAL_NETWORK_H__
 
 #define ETH_ADDRESS_LENGTH 6
 
-#define IPV4_IP_LENGTH 0x10
+#define IPV4_IP_LENGTH     0x10
 
+#define HOST_NAME_LENGTH   64
+
+extern char local_host_name[HOST_NAME_LENGTH];
 extern char local_ip[IPV4_IP_LENGTH];
 extern unsigned char local_mac[ETH_ADDRESS_LENGTH];
 extern char gateway_ip[IPV4_IP_LENGTH];

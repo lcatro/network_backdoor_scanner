@@ -23,7 +23,7 @@ typedef struct {
 bool scan_tcp_init(void);
 bool scan_tcp(const char* target_ip,unsigned short target_port);
 bool scan_tcp_fake_ip(const char* target_ip,unsigned short target_port,const char* fake_ip,unsigned short fake_port);
-bool scan_tcp_get_data(const char* target_ip,unsigned short target_port,const char* path,scan_tcp_port_information* output_data);
+bool scan_tcp_get_data(const char* target_ip,unsigned short target_port,const char* path,const char* target_host,scan_tcp_port_information* output_data);
 void scan_tcp_clean(void);
 
 unsigned int scan_tcp_bind(unsigned short local_port);

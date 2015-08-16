@@ -50,6 +50,7 @@ typedef struct _IP_ADAPTER_INFO {
 
 typedef DWORD (__stdcall *_GetAdaptersInfo)(PIP_ADAPTER_INFO,PULONG);
 
+char local_host_name[HOST_NAME_LENGTH]={0};
 char local_ip[IPV4_IP_LENGTH]={0};
 unsigned char local_mac[ETH_ADDRESS_LENGTH]={0};
 char gateway_ip[IPV4_IP_LENGTH]={0};
@@ -61,9 +62,8 @@ char network_session_last[IPV4_IP_LENGTH]={0};
 unsigned long network_session_size=0;
 
 static void get_ip(void) {
-    char local_host[64]={0};
-    gethostname(local_host,64);
-    hostent* host=gethostbyname(local_host);
+    gethostname(local_host_name,64);
+    hostent* host=gethostbyname(local_host_name);
     char* ip=inet_ntoa(*(in_addr*)host->h_addr_list[0]);
     memcpy(local_ip,ip,strlen(ip));
 }

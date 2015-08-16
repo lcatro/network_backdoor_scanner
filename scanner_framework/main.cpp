@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "local_information.h"
 #include "local_network.h"
 #include "network_crack.h"
 #include "network_dictionary.h"
@@ -85,6 +86,9 @@ static const string command_arplist("arp"),
                     //  DNS 服务器
                     //  using:dns [run|exit] | add %host% %ip% | delete %host%
                     command_help("help"),
+                    //  获取外网IP 地址和粗略定位
+                    //  using:ip
+                    command_ip("ip"),
                     //  显示帮助
                     command_quit("quit");
 
@@ -133,20 +137,27 @@ static execute_state execute_command(const string command) {
                 return ERROR;
             } else if (command_network_information==split[0]) {
                 char mac[0x20]={0};
-                output_inforation="local network information :\r\n";
-                output_inforation+="local_ip:";
+                char system_version[30]={0};
+                output_inforation="local network information:";
+                if (get_system_version(system_version)) {
+                    output_inforation+="\r\nlocal system version:";
+                    output_inforation+=system_version;
+                }
+                output_inforation+="\r\nlocal host name:";
+                output_inforation+=local_host_name;
+                output_inforation+="\r\nlocal ip:";
                 output_inforation+=local_ip;
-                output_inforation+="\r\nlocal_mac:";
+                output_inforation+="\r\nlocal mac:";
                 sprintf(mac,"%X-%X-%X-%X-%X-%X",local_mac[0],local_mac[1],local_mac[2],local_mac[3],local_mac[4],local_mac[5]);
                 output_inforation+=mac;
-                output_inforation+="\r\nnetwork_mask:";
+                output_inforation+="\r\nnetwork mask:";
                 output_inforation+=network_mask;
-                output_inforation+="\r\ngateway_ip:";
+                output_inforation+="\r\ngateway ip:";
                 output_inforation+=gateway_ip;
-                output_inforation+="\r\ngateway_mac:";
+                output_inforation+="\r\ngateway mac:";
                 sprintf(mac,"%X-%X-%X-%X-%X-%X",gateway_mac[0],gateway_mac[1],gateway_mac[2],gateway_mac[3],gateway_mac[4],gateway_mac[5]);
                 output_inforation+=mac;
-                output_inforation+="\r\ndhcp_server:";
+                output_inforation+="\r\ndhcp server:";
                 output_inforation+=dhcp_server;
                 output_inforation+="\r\n";
                 output_data(output_inforation);
@@ -388,7 +399,7 @@ static execute_state execute_command(const string command) {
 
                 unsigned int port=string_to_number(port_);
                 
-                if (scan_tcp_get_data(target_ip.c_str(),port,path.c_str(),&port_information)) {
+                if (scan_tcp_get_data(target_ip.c_str(),port,path.c_str(),NULL,&port_information)) {
                     output_inforation="getpage port(";
                     output_inforation+=number_to_string(port_information.port);
                     output_inforation+=") page-length(";
@@ -461,10 +472,6 @@ static execute_state execute_command(const string command) {
                 }
                 return ERROR;
             } else if (command_dns==split[0]) {
-                /*
-                output_inforation+="DNS 服务器\r\n";
-                output_inforation+="using:dns [run|exit] | add %host% %ip% | delete %host%\r\n";
-                */
                 if (2==result_length) {
                     string flag_run("run"),flag_exit("exit");
                     if (flag_run==split[1]) {
@@ -505,6 +512,37 @@ static execute_state execute_command(const string command) {
                     }
                 }
                 return ERROR;
+            } else if (command_ip==split[0]) {
+                //  http://1111.ip138.com/ic.asp
+                char target_site_ip[IPV4_IP_LENGTH]={0};
+                if (get_host("1111.ip138.com",target_site_ip)) {
+                    scan_tcp_port_information output_data_={0};
+                    if (scan_tcp_get_data(target_site_ip,80,"/ic.asp","1111.ip138.com",&output_data_)) {
+                        if (output_data_.data_length) {
+                            string page_data(output_data_.data);
+                            split_result split(split_string(page_data,"<center>"));
+                            if (!split.second.empty()) {
+                                left_move_string(split.second,8);
+                                split=split_string(split.second,"</center>");
+                                string result_string(split.first);
+                                split=split_string(result_string,"[");
+                                left_move_string(split.second,1);
+                                split=split_string(split.second,"]");
+                                string ip(split.first);
+                                split=split_string(result_string," ");
+                                left_move_string(split.second,7);
+                                output_inforation="ip:\r\n";
+                                output_inforation+=ip;
+                                output_inforation+=" ";
+                                output_inforation+=split.second;
+                                output_inforation+="\r\n";
+                                output_data(output_inforation);
+                                return OK;
+                            }
+                        }
+                    }
+                }
+                return ERROR;
             } else if (command_help==split[0]) {
                 output_inforation="help:\r\n";
                 output_inforation+="扫描当前网段存活的主机,并且自动搜集数据\r\n";
@@ -512,12 +550,13 @@ static execute_state execute_command(const string command) {
                 output_inforation+="获取当前主机的网络信息\r\n";
                 output_inforation+="using:local\r\n";
                 output_inforation+="测试主机是否连通\r\n";
+                output_inforation+="using:ping %ip/host%\r\n";
                 output_inforation+="TCP SYN 扫描主机\r\n";
                 output_inforation+="using:scan %ip% [-P:[port1,port2,port3,...]] [-F:[fake_ip1,fake_ip2,...]]\r\n";
                 output_inforation+="洪水攻击主机\r\n";
                 output_inforation+="using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]\r\n";
                 output_inforation+="在线破解\r\n";
-                output_inforation+="using:crack %ip% %port% [%user_dictionary_path% %password_dictionary_path%]";
+                output_inforation+="using:crack %ip% %port% [%user_dictionary_path% %password_dictionary_path%]\r\n";
                 output_inforation+="路由跟踪\r\n";
                 output_inforation+="using:tracert %ip%\r\n";
                 output_inforation+="抓取页面\r\n";
@@ -526,6 +565,8 @@ static execute_state execute_command(const string command) {
                 output_inforation+="using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]\r\n";
                 output_inforation+="DNS 服务器\r\n";
                 output_inforation+="using:dns [run|exit] | add %host% %ip% | delete %host%\r\n";
+                output_inforation+="获取外网IP 地址和粗略定位\r\n";
+                output_inforation+="using:ip\r\n";
                 output_inforation+="退出\r\n";
                 output_inforation+="using:quit\r\n";
                 output_data(output_inforation);

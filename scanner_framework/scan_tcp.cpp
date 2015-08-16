@@ -161,13 +161,16 @@ void scan_tcp_disconnect(unsigned int tcp_handle) {
     closesocket(tcp_handle);
 }
 
-bool scan_tcp_get_data(const char* target_ip,unsigned short target_port,const char* path,scan_tcp_port_information* output_data) {
+bool scan_tcp_get_data(const char* target_ip,unsigned short target_port,const char* path,const char* target_host,scan_tcp_port_information* output_data) {
     unsigned int tcp_handle=scan_tcp_connect(target_ip,target_port);
     SOCKET sock=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
 
     if (-1!=tcp_handle) {
         char send_buffer[PACKET_SEND_BUFFER]={0};
-        sprintf(send_buffer,SCAN_TCP_HEADER_HTTP,path);
+        if (NULL==target_host)
+            sprintf(send_buffer,SCAN_TCP_HEADER_HTTP,path);
+        else
+            sprintf(send_buffer,SCAN_TCP_HEADER_HTTP_HOST,path,target_host);
 
         scan_tcp_set_recv_block(tcp_handle,SCAN_TCP_GET_DATA_TIME);
         scan_tcp_send(tcp_handle,send_buffer,strlen(send_buffer));

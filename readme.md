@@ -37,6 +37,8 @@ using:getpage %ip% [-PORT:%port%] [-PATH:%path%]<br/>
 using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]<br/>
 启动DNS 服务器 [dns server]<br/>
 using:dns [run|start] | add %host% %ip% | delete %ip%<br/>
+获取外网IP 地址和粗略定位 [get internet ip no is internal network ip and get the location]<br/>
+using:ip<br/>
 显示帮助  [show help]<br/>
 using:help<br/>
 退出  [exit scanner]<br/>
@@ -69,7 +71,7 @@ using:quit<br/>
 	Content-length: %length%<br/>
 	Pragma: no-cache<br/>
 	<br/>
-	\*\*user=%username%&pass=%password%\*\*<br/>
+	__user=%username%&pass=%password%__<br/>
 	
 	其中Content-length: %length% 的意思是让程序自动在此填充上下文的大小<br/>[因为这个长度是会变化的],%username% 和%password% 就是自动填充用户名和密码<br/>[这里也可以不需要全部都用,比如破解水星路由器,直接填%password% 即可启动]<br/>最后输入<end>来确认数据包填写完成,如果中间某个位置出现填写错误就输入<reset>来重新填写破解数据包,下面的输入成功判断条件也是同理..
 	
@@ -80,24 +82,24 @@ using:quit<br/>
 	
 	now cracking!
 	
-	\*\*network crack - target:192.168.1.103:80
-	username:root password:toor\*\*
+	__network crack - target:192.168.1.103:80
+	username:root password:toor__
 	
 	破解完成
 	
 	
 	表达式函数:
 	
-	\*\*base64(%string%)\*\* -- 采用base64 编码
-	\*\*time()\*\* -- 获取系统时间
-	\*\*len(%string%)\*\* -- 统计字符串长度
-	\*\*rnd([%low%-%up%])\*\* -- 在%low% 到%up% 之间生成随机数
+	__base64(%string%)__ -- 采用base64 编码
+	__time()__ -- 获取系统时间
+	__len(%string%)__ -- 统计字符串长度
+	__rnd([%low%-%up%])__ -- 在%low% 到%up% 之间生成随机数
 	
 	Example :
 	
 	破解水星的数据包 (其它都差不多,关键在Cookie):
 	
-	Cookie: a2404_pages=10; a2404_times=5; **Authorization=Basic%20base64(admin:%password%)**\r\n
+	Cookie: a2404_pages=10; a2404_times=5; __Authorization=Basic%20base64(admin:%password%)__\r\n
 	
 	接下来会把%password% 先填充好之后再编码base64
 	

@@ -90,6 +90,10 @@ SOURCE=.\encoder_base64.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\local_information.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\local_network.cpp
 # End Source File
 # Begin Source File
@@ -151,6 +155,10 @@ SOURCE=.\scan_tcp.cpp
 # Begin Source File
 
 SOURCE=.\encoder_base64.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\local_information.h
 # End Source File
 # Begin Source File
 
