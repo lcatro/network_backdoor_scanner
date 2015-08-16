@@ -71,7 +71,7 @@ using:quit<br/>
 	Content-length: %length%<br/>
 	Pragma: no-cache<br/>
 	<br/>
-	__user=%username%&pass=%password%__<br/>
+	**user=%username%&pass=%password%**<br/>
 	
 	其中Content-length: %length% 的意思是让程序自动在此填充上下文的大小<br/>[因为这个长度是会变化的],%username% 和%password% 就是自动填充用户名和密码<br/>[这里也可以不需要全部都用,比如破解水星路由器,直接填%password% 即可启动]<br/>最后输入<end>来确认数据包填写完成,如果中间某个位置出现填写错误就输入<reset>来重新填写破解数据包,下面的输入成功判断条件也是同理..
 	
