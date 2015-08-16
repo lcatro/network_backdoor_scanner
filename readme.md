@@ -44,6 +44,9 @@ using:help<br/>
 退出  [exit scanner]<br/>
 using:quit<br/>
 
+
+***
+
 ###在线破解  [About Online Crack]
 >在线破解功能原理是通过自己构造特定的HTTP 数据包然后程序根据字典穷举测试出帐号密码
 >
@@ -125,6 +128,9 @@ dns delete www.baidu.com 删除DNS 查询项目 [delete this record]<br/>
 
 ####端口转发原理 [tunnal port design]
 ####![image](https://raw.githubusercontent.com/lcatro/network_backdoor/master/scanner_framework/route_design.png)
+
+
+***
 
 ###Other
 
