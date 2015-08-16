@@ -63,35 +63,29 @@ using:quit<br/>
 >input your crack express:
 >
 >输入数据包数据:
->POST http://192.168.1.103:80/api/analays.php HTTP/1.1
->Accept: application/x-ms-application, image/jpeg, application/xaml+xml, image/gif, image/pjpeg, application/x-ms-xbap, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, */*
->Referer: http://192.168.1.103/api/analays.php
->Accept-Language: zh-CN
->User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E)
->Content-Type: application/x-www-form-urlencoded
->Accept-Encoding: gzip, deflate
->Host: 192.168.1.103
->Content-length: %length%
->Pragma: no-cache
+>POST http://192.168.1.103:80/api/analays.php HTTP/1.1<br/>
+>Accept: application/x-ms-application, image/jpeg, application/xaml+xml, image/gif, image/pjpeg, application/x-ms-xbap, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, */*<br/>
+>Referer: http://192.168.1.103/api/analays.php<br/>
+>Accept-Language: zh-CN<br/>
+>User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E)<br/>
+>Content-Type: application/x-www-form-urlencoded<br/>
+>Accept-Encoding: gzip, deflate<br/>
+>Host: 192.168.1.103<br/>
+>Content-length: %length%<br/>
+>Pragma: no-cache<br/>
+><br/>
+>__user=%username%&pass=%password%__<br/>
 >
->__user=%username%&pass=%password%__
->
->其中Content-length: %length% 的意思是让程序自动在此填充上下文的大小
->[因为这个长度是会变化的],%username% 和%password% 就是自动填充用户名
->和密码<br/>[这里也可以不需要全部都用,比如破解水星路由器,直接填
->%password% 即可启动]<br/>最后输入<end>来确认数据包填写完成,如果中间
->某个位置出现填写错误就输入<reset>来重新填写破解数据包,
->下面的输入成功判断条件也是同理..
+>其中Content-length: %length% 的意思是让程序自动在此填充上下文的大小[因为这个长度是会变化的],%username% 和%password% 就是自动填充用户名和密码<br/>[这里也可以不需要全部都用,比如破解水星路由器,直接填%password% 即可启动]<br/>最后输入<end>来确认数据包填写完成,如果中间某个位置出现填写错误就输入<reset>来重新填写破解数据包,下面的输入成功判断条件也是同理..
 >
 >input your check term:
 >
->输入成功判断条件,由于经过测试,如果输入密码成功的话,
->页面会返回一个包含Success 的字符串,然后把他作为破解成功的测试条件
+>输入成功判断条件,由于经过测试,如果输入密码成功的话,页面会返回一个包含Success 的字符串,然后把他作为破解成功的测试条件..<br/>
 >Success
 >
 >now cracking!
 >
->__network crack - target:192.168.1.103:80
+>__network crack - target:192.168.1.103:80<br/>
 >username:root password:toor__
 >
 >破解完成
@@ -99,10 +93,10 @@ using:quit<br/>
 >
 >表达式函数:
 >
->__base64(%string%)__ -- 采用base64 编码
->__time()__ -- 获取系统时间
->__len(%string%)__ -- 统计字符串长度
->__rnd([%low%-%up%])__ -- 在%low% 到%up% 之间生成随机数
+>__base64(%string%)__ -- 采用base64 编码<br/>
+>__time()__ -- 获取系统时间<br/>
+>__len(%string%)__ -- 统计字符串长度<br/>
+>__rnd([%low%-%up%])__ -- 在%low% 到%up% 之间生成随机数<br/>
 >
 >Example :
 >
