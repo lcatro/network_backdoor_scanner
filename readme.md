@@ -3,7 +3,7 @@
 
 
 中文:
-网络探测框架,适用于入侵到内网探测其它网络设备,探测器具有体积小,功能多,而且带有反向连接从内网穿透出外网连接控制终端,通信数据采用动态加密,再也不怕警察叔叔知道我在干坏事儿啦,为了方便破解一些弱口令设备,内部带有在线破解功能(暂时支持HTTP 破解).如果觉得这些功能满足不了需求,可以使用端口映射把你需要的工具直接通过隧道对接到内网的某台指定的主机端口上进行扫描..    --  LCatro<br/>
+网络探测框架,适用于入侵到内网探测其它网络设备,探测器具有体积小,功能多,而且带有反向连接从内网穿透出外网连接控制终端,通信数据采用动态加密,再也不怕警察叔叔知道我在干坏事儿啦,为了方便破解一些弱口令设备,内部带有在线破解功能(暂时支持HTTP 破解).如果觉得这些功能满足不了需求,可以使用端口映射把你需要的工具直接通过隧道对接到内网的某台指定的主机端口上进行扫描..  --  LCatro<br/>
 
 English:
 This is an internal network scanner like meterpreter .I will create more function into it scanner (now include many basic network scanner and network crack [like BurpSuite,crack HTTP]).Reverse connect function is to facilitate the attacker management hacked machine and crypte communication.Tunnel connect help your attack process's network flow  crossing the firewall of internal network.<br/>
@@ -18,31 +18,31 @@ scanner.exe -recon %ip% [%port%] 反向连接,远程访问,默认是80,注意记
 
 ###使用方法  [How to use it ]
 扫描当前网段存活的主机,并且自动搜集数据  [using ARP request to query live machine in current network]<br/>
-using:arp<br/>
+__using:arp__<br/>
 获取当前主机的网络信息  [get this machine's information]<br/>
-using:local<br/>
+__using:local__<br/>
 测试主机是否连通  [ping ..you most know it ..]<br/>
-using:ping %ip/host%<br/>
+__using:ping %ip/host%__<br/>
 TCP SYN 扫描主机  [tcp syn scan,set -P scanner will testing port,set -F is fake a ip for hide itsalf in attack flow]<br/>
-using:scan %ip% [-P:[port1,port2,port3,...]] [-F:[fake_ip1,fake_ip2,...]]<br/>
+__using:scan %ip% [-P:[port1,port2,port3,...]] [-F:[fake_ip1,fake_ip2,...]]__<br/>
 洪水攻击主机  [dont use it ,because you will expose,so i never develop this function]<br/>
-using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]<br/>
+__using:flood %ip% [-P:[port1,...]] [-F:[fake_ip1,...]]__<br/>
 在线破解  [online crack]<br/>
-using:crack %ip% %port% [%user_dictionary_path% %password_dictionary_path%]<br/>
+__using:crack %ip% %port% [%user_dictionary_path% %password_dictionary_path%]__<br/>
 路由跟踪  [tracert route]<br/>
-using:tracert %ip/host%<br/>
+__using:tracert %ip/host%__<br/>
 抓取页面  [get a HTML page on server]<br/>
-using:getpage %ip% [-PORT:%port%] [-PATH:%path%]<br/>
+__using:getpage %ip% [-PORT:%port%] [-PATH:%path%]__<br/>
 启动端口转发功能  [tunnal port]<br/>
-using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]<br/>
+__using:route -R:[%remote_ip%,%remote_port%] -L:[[%local_ip%,]%local_port%]__<br/>
 启动DNS 服务器 [dns server]<br/>
-using:dns [run|start] | add %host% %ip% | delete %ip%<br/>
+__using:dns [run|start] | add %host% %ip% | delete %ip%__<br/>
 获取外网IP 地址和粗略定位 [get internet ip no is internal network ip and get the location]<br/>
-using:ip<br/>
+__using:ip__<br/>
 显示帮助  [show help]<br/>
-using:help<br/>
+__using:help__<br/>
 退出  [exit scanner]<br/>
-using:quit<br/>
+__using:quit__<br/>
 
 
 ***
@@ -102,13 +102,15 @@ using:quit<br/>
 >
 >破解水星的数据包 (其它都差不多,关键在Cookie):
 >
->Cookie: a2404_pages=10; a2404_times=5; __Authorization=Basic%20base64(admin:%password%)__\r\n
+>Cookie: a2404_pages=10; a2404_times=5; __Authorization=Basic%20base64(admin:%password%)__
 >
 >接下来会把%password% 先填充好之后再编码base64
 >
 >WARNING! 由于水平问题还做不出递归,请见谅 ..  
 >
 
+
+***
 
 ####DNS 服务器 [About DNS Server]
 
@@ -119,6 +121,7 @@ dns exit 退出DNS 服务器 [exit dns server]<br/>
 dns add m.login.taobao.com 127.0.0.1 把淘宝的手机登陆域名绑定到本地IP [point m.login.taobao.com to localhost via dns setting]<br/>
 dns delete www.baidu.com 删除DNS 查询项目 [delete this record]<br/>
 
+<br/>
 
 ####端口转发原理 [tunnal port design]
 ####![image](https://raw.githubusercontent.com/lcatro/network_backdoor/master/scanner_framework/route_design.png)
