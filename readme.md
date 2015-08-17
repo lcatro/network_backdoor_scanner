@@ -12,9 +12,9 @@ This is an internal network scanner like meterpreter .I will create more functio
 ***
 
 ###启动方式  [How to launch it ]
-scanner.exe 控制台启动  [Launch it by console]<br/>
-scanner.exe -bind [%port%] 绑定端口,远程访问  [Bind a local port for waitting you to connect it]<br/>
-scanner.exe -recon %ip% [%port%] 反向连接,远程访问,默认是80,注意记得先启动reverse_server ,不然scanner.exe 不能成功连接  [Reverse connect to specify ip,WARNING!Remenber launch reverse_server first and then using this parameter launch scanner.exe]<br/>
+__scanner.exe__ 控制台启动  [Launch it by console]<br/>
+__scanner.exe -bind [%port%]__ 绑定端口,远程访问  [Bind a local port for waitting you to connect it]<br/>
+__scanner.exe -recon %ip% [%port%]__ 反向连接,远程访问,默认是80,注意记得先启动reverse_server ,不然scanner.exe 不能成功连接  [Reverse connect to specify ip,WARNING!Remenber launch reverse_server first and then using this parameter launch scanner.exe]<br/>
 
 ###使用方法  [How to use it ]
 扫描当前网段存活的主机,并且自动搜集数据  [using ARP request to query live machine in current network]<br/>
