@@ -88,6 +88,10 @@ bool scan_icmp(const char* target_ip,reply* output_information) {
     return Rtn;
 }
 
+ping_list scan_icmp_list(const char* target_network,unsigned long target_network_subnet) {
+    ping_list result;
+}
+
 tracert_list scan_icmp_tracert(const char* target_ip) {
     tracert_list result;
     IPAddr target_addr=(IPAddr)inet_addr(target_ip);

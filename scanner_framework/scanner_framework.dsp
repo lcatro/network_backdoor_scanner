@@ -98,6 +98,10 @@ SOURCE=.\local_network.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\local_thread.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\main.cpp
 # End Source File
 # Begin Source File
@@ -163,6 +167,10 @@ SOURCE=.\local_information.h
 # Begin Source File
 
 SOURCE=.\local_network.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\local_thread.h
 # End Source File
 # Begin Source File
 

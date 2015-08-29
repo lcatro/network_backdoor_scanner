@@ -513,7 +513,6 @@ static execute_state execute_command(const string command) {
                 }
                 return ERROR;
             } else if (command_ip==split[0]) {
-                //  http://1111.ip138.com/ic.asp
                 char target_site_ip[IPV4_IP_LENGTH]={0};
                 if (get_host("1111.ip138.com",target_site_ip)) {
                     scan_tcp_port_information output_data_={0};

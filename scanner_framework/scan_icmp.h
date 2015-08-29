@@ -28,8 +28,15 @@ typedef struct {
     unsigned int delay;
 } reply;
 
+typedef struct {
+    string ip;
+    reply  ping_reply;
+} reply_ip;
+typedef vector<reply_ip> ping_list;
+
 bool         scan_icmp_init(void);
 bool         scan_icmp(const char* target_ip,reply* output_information);
+ping_list    scan_icmp_list(const char* target_network,unsigned long target_network_subnet);
 tracert_list scan_icmp_tracert(const char* target_ip);
 void         scan_icmp_clean(void);
 
